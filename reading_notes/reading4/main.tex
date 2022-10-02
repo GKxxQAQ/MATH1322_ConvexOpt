@@ -1,0 +1,279 @@
+\documentclass[12pt]{article}
+
+\usepackage{../conopdefs}
+\usepackage[margin = 1in]{geometry}
+\usepackage{euler, bm}
+
+\title{Convex Optimization: Reading Notes 4}
+\author{GKxx}
+\date{May 2, 2022}
+
+\begin{document}
+
+\maketitle
+
+\section{Lagrange duality}
+
+\begin{definition}[Lagrangian]
+    For an optimization problem
+    \begin{equation}\label{optproblem}
+        \begin{aligned}
+            \min\quad & f_0(x)&\\
+            \subjectto\quad &f_i(x)\leqslant 0, &i=1,\cdots,m,\\
+            &h_i(x)=0,&i=1,\cdots,p,
+        \end{aligned}
+    \end{equation}
+    with variable \(x\in\R^n\), domain \(\mathcal D=\bigcap_{i=0}^m\dom f_i\cap\bigcap_{i=1}^ph_i\) and optimal value \(p^\ast\), we define its \textnormal{Lagrangian} to be
+    \[L(x,\lambda,\nu)=f_0(x)+\sum_{i=1}^m\lambda_if_i(x)+\sum_{i=1}^p\nu_ih_i(x),\]
+    with domain
+    \[\dom L=\mathcal D\times\R^m\times\R^p.\]
+    The variables \(\lambda_i\) and \(\nu_i\) are called the \textnormal{Lagrangian multipliers} or \textnormal{dual variables}.
+\end{definition}
+
+\begin{definition}[Lagrange dual function]
+    For the optimization problem defined as in (\ref{optproblem}), the \textnormal{Lagrange dual function} is
+    \[g(\lambda,\nu)=\inf_{x\in\mathcal D}L(x,\lambda,\nu).\]
+\end{definition}
+
+\begin{remark}
+    The Lagrange dual function is concave.
+\end{remark}
+
+\begin{proposition}[Lower bound property]
+    \(g(\lambda,\nu)\leqslant p^\ast\) for every \(\lambda\succeq 0\).
+\end{proposition}
+\begin{proof}
+    Suppose the optimal value \(p^\ast\) is achieved at \(x=\tilde x\). For every \(\lambda\succeq 0\), we have that
+    \[g(\lambda,\nu)=\inf_{x\in\mathcal D}L(x,\lambda,\nu)\leqslant L(\tilde x,\lambda,\nu)=f_0(\tilde x)+\sum_{i=1}^m\lambda_if_i(x)+\sum_{i=1}^p\nu_ih_i(x),\]
+    where \(f_i(x)\leqslant 0\) and \(h_j(x)=0\) for every \(i=1,\cdots,m,j=1,\cdots,p\), so
+    \[g(\lambda,\nu)\leqslant f_0(\tilde x).\]
+\end{proof}
+
+\begin{definition}[Dual feasibility]
+    A pair \((\lambda,\nu)\) is referred to as \textnormal{dual feasible} if \(\lambda\succeq 0\) and \((\lambda,\nu)\in\dom g\).
+\end{definition}
+
+\begin{remark}[Conjugate function]
+    The conjugate function of \(f\) is
+    \[f^\ast(y)=\sup_x\left(y^Tx-f(x)\right).\]
+\end{remark}
+
+\begin{proposition}
+    For an optimization problem with linear constraints
+    \[\begin{aligned}
+        \min\quad &f_0(x)\\
+        \subjectto\quad &Ax\preceq b\\
+        &Cx=d,
+    \end{aligned}\]
+    the Lagrangian is
+    \[L(x,\lambda,\nu)=f_0(x)+\lambda^T(Ax-b)+\nu^T(Cx-d),\]
+    and the Lagrange dual function is
+    \[\begin{aligned}
+        g(\lambda,\nu)
+        &=\inf_x\left(f_0(x)+\left(A^T\lambda+C^T\nu\right)^Tx\right)-b^T\lambda-d^T\nu\\
+        &=f_0^\ast\left(-A^T\lambda-C^T\nu\right)-b^T\lambda-d^T\nu.
+    \end{aligned}\]
+\end{proposition}
+
+\begin{remark}
+    The Lagrange dual problem is convex.
+\end{remark}
+
+\begin{definition}[Lagrange dual problem]
+    For an optimization problem in the form of (\ref{optproblem}), the \textnormal{Lagrange dual problem} is
+    \[\begin{aligned}
+        \max\quad&g(\lambda,\nu)\\
+        \subjectto\quad &\lambda\succeq 0.
+    \end{aligned}\]
+    The optimal value is denoted by \(d^\ast\). The difference \(p^\ast-d^\ast\) is called the \textnormal{duality gap}.
+\end{definition}
+
+\begin{example}[Linear program]
+    The Lagrange dual of a linear program
+    \begin{equation}\label{lpprimal}
+        \begin{aligned}
+            \min\quad & c^Tx\\
+            \subjectto\quad & Ax\preceq b
+        \end{aligned}
+    \end{equation}
+    is
+    \begin{equation}\label{lpdual}
+        \begin{aligned}
+            \max\quad & -b^T\lambda\\
+            \subjectto\quad & A^T\lambda+c=0\\
+            & \lambda\succeq 0.
+        \end{aligned}
+    \end{equation}
+\end{example}
+\begin{proof}
+    The Lagrangian of problem (\ref{lpprimal}) is
+    \[L(x,\lambda)=c^Tx+\lambda^T(Ax-b),\]
+    so the Lagrange dual function is
+    \[g(\lambda)=\inf_x\left(c+A^T\lambda\right)^Tx-b^T\lambda.\]
+    Note that unless \(c+A^T\lambda=0\), the infimum of a linear function \(\left(c+A^T\lambda\right)^Tx\) is \(-\infty\). Therefore
+    \[g(\lambda)=\begin{cases}
+        -b^T\lambda,&A^T\lambda+c=0,\\
+        -\infty,&\otherwise.
+    \end{cases}\]
+    Therefore, the dual problem is
+    \[\begin{aligned}
+        \max\quad & -b^T\lambda \\
+        \subjectto\quad & A^T\lambda+c=0\\
+        & \lambda\succeq 0.
+    \end{aligned}\]
+\end{proof}
+
+\begin{theorem}[Weak duality]
+    \(d^\ast\leqslant p^\ast\). It follows directly from the lower bound property.
+\end{theorem}
+
+\begin{definition}[Strong duality]
+    If \(d^\ast=p^\ast\) for some problem, we say that the \textnormal{strong duality} holds.
+\end{definition}
+
+\begin{definition}[Slater's condition]\label{slater}
+    For a convex problem
+    \begin{equation}\label{convexproblem}
+        \begin{aligned}
+            \min\quad & f_0(x) &\\
+            \subjectto\quad & f_i(x)\leqslant 0, & i=1,\cdots,m\\
+            & Ax=b
+        \end{aligned}
+    \end{equation}
+    with domain \(\mathcal D\), we say that the \textnormal{Slater's condition} holds if there exists \(x\in\relint\mathcal D\) such that \(f_i(x)<0\) for every \(i=1,\cdots,m\). Such a point is also called \textnormal{strictly feeasible}.
+\end{definition}
+
+\begin{definition}[Refined Slater's condition]
+    The refined Slater's condition does not require affine inequalities to hold with strict inequality.
+\end{definition}
+
+\begin{theorem}
+    Both the Slater's condition and its refined condition imply strong duality.
+\end{theorem}
+\begin{proof}
+    We consider the convex problem of the form (\ref{convexproblem}). Assume that the matrix \(A\) has full rank, otherwise we can eliminate some of the equality constraints that are expressible as linear combinations of other constraints. We further assume that the domain \(\mathcal D\) has nonempty interior, which means \(\relint \mathcal D=\inter \mathcal D\). Suppose that Slater's condition holds.\par
+    Define
+    \[\mathscr A=\left\{(u,v,t)\mid \exists x\in \mathcal D\suchthat f(x)\preceq u,Ax-b=v,f_0(x)\leqslant t\right\},\]
+    and
+    \[\mathscr B=\left\{(0,0,s)\in\R^m\times\R^p\times\R\mid s<p^\ast\right\}.\]
+    It is easy to see by definition that \(\mathscr A\) and \(\mathscr B\) are convex. Pick \((u,v,t)\in\mathscr A\cap\mathscr B\), so that \(\exists x\in\mathcal D\suchthat f_0(x)\leqslant t<p^\ast\), which is impossible. This shows that \(\mathscr A\) and \(\mathscr B\) are disjoint. By the separating hyperplane theorem, there exist \((\tilde\lambda,\tilde\nu,\mu)\neq 0\) and \(\alpha\) such that
+    \[\forall (u,v,t)\in\mathscr A,\quad \tilde\lambda^Tu+\tilde\nu^Tv+\mu t\geqslant\alpha,\]
+    and
+    \[\forall (u,v,t)\in\mathscr B,\quad \tilde\lambda^Tu+\tilde\nu^Tv+\mu t=\mu t\leqslant\alpha.\]
+    Note that for every \((u,v,t)\in\mathscr A\), any \((u^\prime,v,t^\prime)\) satisfying \(u^\prime\succ u,t^\prime>t\) is also in \(\mathscr A\). Therefore, \(\tilde\lambda\succeq 0\) and \(\mu\geqslant 0\) must hold, otherwise \(\tilde\lambda^Tu+\tilde\nu^Tv+\mu t\) would not be bounded below by \(\alpha\).\par
+    Since \(\mu\geqslant 0\) and for every \(s<p^\ast\) we have \(\mu s\leqslant\alpha\), it follows that \(\mu p^\ast\leqslant\alpha\), so we obtain
+    \[\mu p^\ast\leqslant\alpha\leqslant\tilde\lambda^Tu+\tilde\nu^Tv+\mu t\]
+    for every \((u,v,t)\in\mathscr A\). This gives that for every \(x\in\mathcal D\),
+    \[\mu p^\ast\leqslant\alpha\leqslant\sum_{i=1}^m\tilde\lambda_if_i(x)+\tilde\nu^T(Ax-b)+\mu f_0(x).\]
+    When \(\mu>0\), the above leads to
+    \[L\left(x,\frac{\tilde\lambda}{\mu},\frac{\tilde\nu}{\mu}\right)\geqslant\frac{\alpha}{\mu}\geqslant p^\ast\]
+    for any \(x\in\mathcal D\). Therefore
+    \[g\left(\frac{\tilde\lambda}{\mu},\frac{\tilde\nu}{\mu}\right)=\inf_x L\left(x,\frac{\tilde\lambda}{\mu},\frac{\tilde\nu}{\mu}\right)\geqslant p^\ast,\]
+    but the weak duality theorem says that
+    \[g(\lambda,\nu)\leqslant p^\ast,\quad\forall\lambda\succeq0,\nu.\]
+    Hence \(g\left(\frac{\tilde\lambda}{\mu},\frac{\tilde\nu}{\mu}\right)=p^\ast\), so the strong duality holds.\par
+    If \(\mu=0\), the Slater's condition gives that for some \(\tilde x\in\inter\mathcal D\),
+    \[f_i\left(\tilde x\right)<0,i=1,\cdots,m,\quad\textnormal{and}\quad A\tilde x-b=0.\]
+    Therefore
+    \[0\leqslant\alpha\leqslant\sum_{i=1}^m\tilde\lambda_if_i\left(\tilde x\right),\]
+    but \(\tilde\lambda\succeq0\) and \(f_i\left(\tilde x\right)<0\) holds for every \(i\). This implies \(\tilde\lambda=0\), so \(\tilde\nu^T(Ax-b)\geqslant 0\,\forall x\in\mathcal D\). From \((\tilde\lambda,\tilde\nu,\mu)\neq 0\) and \(\tilde\lambda=0,\mu=0\) we obtain \(\tilde\nu\neq0\). Since \(\tilde x\in\inter\mathcal D\) and \(\tilde nu^T(A\tilde x-b)=0\), there must be some \(x\in D\) with \(\tilde\nu^T(Ax-b)<0\) unless \(\tilde\nu^T A=0\), while this contradicts the assumption that \(A\) has full rank.
+\end{proof}
+
+\begin{theorem}
+    Strong duality also holds for problems with a quadratic objective and one quadratic inequality constraint, provided that Slater's condition holds.
+\end{theorem}
+
+\section{Optimality conditions}
+
+\begin{theorem}[Complementary slackness]
+    Suppose that the strong duality holds. If \(x^\ast\) is primal optimal and \((\lambda^\ast,\nu^\ast)\) is dual optimal, then
+    \[\lambda^\ast_if_i(x^\ast)=0,\quad i=1,\cdots,m.\]
+\end{theorem}
+\begin{proof}
+    We have that
+    \[\begin{aligned}
+        f(x^\ast)
+        = g(\lambda^\ast,\nu^\ast)
+        &= \inf_x L(x,\lambda^\ast,\nu^\ast)\\
+        &\leqslant L(x^\ast,\lambda^\ast,\nu^\ast)
+        =f_0(x^\ast)+\sum_{i=1}^m\lambda^\ast_if_i(x^\ast)+\sum_{i=1}^p\nu^\ast_ih_i(x^\ast)
+        \leqslant f_0(x^\ast).
+    \end{aligned}\]
+    Since \(h_i(x^\ast)=0,i=1,\cdots,p\), it follows that
+    \[\sum_{i=1}^m\lambda^\ast_if_i(x^\ast)=0,\]
+    while \(\lambda^\ast_i\geqslant 0,f_i(x^\ast)\leqslant 0\). Therefore
+    \[\lambda^\ast_if_i(x^\ast)=0,\quad i=1,\cdots,m.\]
+\end{proof}
+
+\begin{definition}[Karush-Kuhn-Tucker conditions]
+    Suppose \(f_0,f_1,\cdots,f_m,h_1,\cdots,h_p\) are differentiable. For \(x,\lambda,\nu\), the \textnormal{KKT conditions} are
+    \begin{enumerate}
+        \item Primal feasible: \(f_i(x)\leqslant 0,i=1,\cdots,m\) and \(h_i(x)=0,i=1,\cdots,p\).
+        \item Dual feasible: \(\lambda\succeq 0\).
+        \item Complementary slackness: \(\lambda_if_i(x)=0,i=1,\cdots,m\).
+        \item \(\nabla_x L(x,\lambda,\nu)=0\), i.e.
+        \[\nabla f_0(x)+\sum_{i=1}^m\lambda_i\nabla f_i(x)+\sum_{i=1}^p\nu_i\nabla h_i(x)=0.\]
+    \end{enumerate}
+\end{definition}
+
+\begin{theorem}
+    When strong duality holds, any primal optimal \(\tilde x\) and dual optimal \(\left(\tilde\lambda,\tilde\nu\right)\) must satisfy the KKT conditions.
+\end{theorem}
+
+\begin{theorem}
+    For convex problems, if \(\left(\tilde x,\tilde\lambda,\tilde\nu\right)\) satisfy the KKT conditions, then \(\tilde x\) is primal optimal and \(\left(\tilde\lambda,\tilde\nu\right)\) is dual optimal, with zero duality gap.
+\end{theorem}
+\begin{proof}
+    Suppose \(\left(\tilde x,\tilde\lambda,\tilde\nu\right)\) satisfy the KKT conditions. The dual feasibility implies that \(L\left(x,\tilde\lambda,\tilde\nu\right)\) is convex in \(x\). Since \(\nabla_xL\left(x,\tilde\lambda,\tilde\nu\right)=0\), it follows that \(\tilde x\) minimizes \(L\left(x,\tilde\lambda,\tilde\nu\right)\). Therefore
+    \[g\left(\tilde\lambda,\tilde\nu\right)=\inf_xL\left(x,\tilde\lambda,\tilde\nu\right)=L\left(\tilde x,\tilde\lambda,\tilde\nu\right)=f_0\left(\tilde x\right)+\sum_{i=1}^m\lambda_if_i\left(\tilde x\right).\]
+    From the complementary slackness we obtain \(g\left(\tilde\lambda,\tilde\nu\right)=f_0\left(\tilde x\right)\), therefore strong duality holds, and \(\left(\tilde x,\tilde\lambda,\tilde\nu\right)\) is optimal.
+\end{proof}
+
+\begin{corollary}
+    If Slater's condition holds for a convex problem, then \(\tilde x\) is optimal if and only if \(\exists\left(\tilde\lambda,\tilde\nu\right)\suchthat\left(\tilde x,\tilde\lambda,\tilde\nu\right)\) satisfy the KKT conditions.
+\end{corollary}
+
+\begin{definition}[Active set]
+    The \textnormal{active set} at a feasible point \(x\) is
+    \[\mathcal A(x)=\left\{i\mid f_i(x)=0,1\leqslant i\leqslant m\right\}.\]
+\end{definition}
+
+\begin{definition}[LICQ]
+    The \textnormal{linear independence constraint qualification} is said to hold at \(x\) if the set of active constraint gradients
+    \[\left\{\nabla f_i(x),\nabla h_j(x)\mid i\in\mathcal A(x),j=1,\cdots,p\right\}\]
+    is linearly independent at \(x\).
+\end{definition}
+
+\begin{theorem}
+    Suppose \(x^\ast\) is a local optimal at which the LICQ holds. Then there exists Lagrange multipliers \(\left(\lambda^\ast,\nu^\ast\right)\) such that \(\left(x^\ast,\lambda^\ast,\nu^\ast\right)\) satisfies the KKT conditions.
+\end{theorem}
+
+\begin{definition}[MFCQ]
+    The \textnormal{Mangasarian-Fromovitz constraint qualification} is said to hold at \(x\) if the set of equality constrait gradients
+    \[\left\{\nabla h_i(x)\mid i=1,\cdots,p\right\}\]
+    is linearly independnet, and there exists \(d\) such that
+    \[\nabla h_i(x)^Td=0\,\forall i=1,\cdots,p,\quad\textnormal{and}\quad \nabla f_i(x)^Td<0\,\forall i\in\mathcal A(x).\]
+\end{definition}
+
+\begin{theorem}
+    LICQ implies MFCQ.
+\end{theorem}
+
+\begin{definition}[Strong Slater's condition]\label{strongslater}
+    The \textnormal{strong Slater's condition} is satisfied if the set of equality constraint gradients
+    \[\left\{\nabla h_i(x)\mid i=1,\cdots,p\right\}\]
+    is linearly independent and there exists a feasible point strictly satisfying all inequality constraints, i.e. \(\exists x\in\mathcal D\) such that
+    \[f_i(x)<0,i=1,\cdots,m\quad\textnormal{and}\quad h_i(x)=0,i=1,\cdots,p.\]
+\end{definition}
+
+\begin{theorem}
+    The Slater's condition (\ref{slater}) implies the existence of a nonempty, closed, convex set \(\Lambda_\ast\) such that for all \(\left(\lambda^\ast,\nu^\ast\right)\in\Lambda_\ast\), \(\left(x,\lambda^\ast,\nu^\ast\right)\) satisfies the KKT conditions. The strong Slater's condition (\ref{strongslater}) implies the existence of such a \(\Lambda_\ast\) that is bounded.
+\end{theorem}
+
+For more common and useful CQs and their relationship with KKT conditions, see \cite{wachsmuth2013licq}.
+
+\bibliographystyle{ieeetr}
+
+\bibliography{ref}
+
+\end{document}

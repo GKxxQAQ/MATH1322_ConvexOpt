@@ -1,0 +1,207 @@
+\documentclass[12pt]{article}
+
+\usepackage{../conopdefs}
+\usepackage[margin = 1in]{geometry}
+\usepackage{euler, bm}
+
+\title{Convex Optimization: Reading Notes 2}
+\author{GKxx}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Convexity-preserving functions}
+
+\begin{definition}[Affine function]
+    An \textnormal{affine function} \(f:\R^n\to\R^m\) is of the form
+    \[f(x)=Ax+b,\]
+    with \(A\in\R^{m\by n}\) and \(b\in\R^n\).
+\end{definition}
+
+\begin{proposition}
+    The image of a convex set under an affine function is convex.
+\end{proposition}
+\begin{proof}
+    Suppose \(S\subseteq\R^n\) is convex and \(f(x)=Ax+b\) is an affine function \(f:\R^n\to\R^m\). For any \(f(x), f(y)\in f(C)\) and any \(\theta\in[0,1]\), the convex combination is \(\theta f(x)+(1-\theta)f(y)=A(\theta x+(1-\theta)y)+b=f(\theta x+(1-\theta)y)\), while \(\theta x+(1-\theta)y\in C\) due to the convexity of \(C\). Therefore, \(\theta f(x)+(1-\theta)f(y)\in f(C)\).
+\end{proof}
+
+\begin{proposition}
+    The inverse image of a convex set under an affine function is convex.
+\end{proposition}
+\begin{proof}
+    Suppose \(C\) is a convex set and \(f(x)=Ax+b\) is an affine function. We will show that
+    \[f^{-1}(C)=\left\{x\in\R^n\mid f(x)\in C\right\}\]
+    is convex. For any \(x,y\in\R^n\) with \(f(x),f(y)\in C\) and any \(\theta\in[0,1]\), we have that
+    \[f(\theta x+(1-\theta)y)=A(\theta x+(1-\theta y)+b=\theta(Ax+b)+(1-\theta)(Ay+b))=\theta f(x)+(1-\theta) f(y).\]
+    This is in the set \(C\) because \(C\) is convex and both \(f(x)\) and \(f(y)\) are in \(C\).
+\end{proof}
+
+\begin{example}
+    The hyperbolic cone
+    \[H=\left\{x\in\R^n\mid x^TPx\leqslant\left(c^Tx\right)^2,c^Tx\geqslant 0\right\},\]
+    where \(P\in\mathbb S_+^n\) and \(c\in\R^n\), is convex.
+\end{example}
+\begin{proof}
+    \(H\) is the inverse image of the second-order cone
+    \[K=\left\{(z,t)\mid z^Tz\leqslant t^2,t\geqslant 0\right\}\]
+    under the affine function \(f:\R^n\to\R^{n+1}\) given by
+    \[f(x)=\begin{bmatrix}
+        P^{1/2}\\ c^T
+    \end{bmatrix}x.\]
+\end{proof}
+
+\begin{definition}[Perspective function]
+    A \textnormal{perspective function} \(P:\R^{n+1}\to\R^n\) is of the form
+    \[P(x,t)=x/t,\]
+    where \(x\in\R^n\) and \(t>0\). It can also be written as
+    \[P(x)=\frac{1}{x_{n+1}}\bvec{x_1 & \cdots & x_n}^T.\]
+\end{definition}
+
+\begin{proposition}
+    The image of a convex set under a perspective function is convex.
+\end{proposition}
+\begin{proof}
+    Suppose \(C\subseteq\R^n\times\R_{++}\) is a convex set and \(P\) is a perspective function. For every \(x=\left(\tilde{x_n},x_{n+1}\right),y=\left(\tilde{y_n},y_{n+1}\right)\in C\) and every \(\theta\in[0,1]\), we have that
+    \[\begin{aligned}
+        P(\theta x+(1-\theta)y)
+        &=\frac{\theta\tilde{x_n}+(1-\theta)\tilde{y_n}}{\theta x_{n+1}+(1-\theta)y_{n+1}}\\
+        &=\frac{\tilde{x_n}}{x_{n+1}}\cdot\frac{\theta x_{n+1}}{\theta x_{n+1}+(1-\theta)y_{n+1}}+\frac{\tilde{y_n}}{y_{n+1}}\cdot\frac{(1-\theta)y_{n+1}}{\theta x_{n+1}+(1-\theta)y_{n+1}}\\
+        &=\mu P(x)+(1-\mu)P(y),
+    \end{aligned}\]
+    where
+    \[\mu=\frac{\theta x_{n+1}}{\theta x_{n+1}+(1-\theta)y_{n+1}}\in[0,1].\]
+    It is obvious that \(\mu\) is monotonic with respect to \(\theta\), so the image of the line segment \([x,y]\) under \(P\) is \([P(x),P(yy)]\). Due to the convexity of \(C\), we have \([x,y]\subseteq C\) and therefore \([P(x),P(y)]\subseteq P(C)\). Then for every \(\theta\in[0,1]\) we have \(\theta P(x)+(1-\theta)P(y)\in[P(x),P(y)]\subseteq P(C)\), so \(P(C)\) is convex.
+\end{proof}
+
+\begin{proposition}
+    The inverse image of a convex set under a perspective function is convex.
+\end{proposition}
+\begin{proof}
+    Suppose \(C\subseteq\R^n\) is a convex set and \(P\) is a perspective function. Take any \(x,y\in P^{-1}(C)\) so that \(P(x),P(y)\in C\). For any \(\theta\in[0,1]\), let \(x_0=\theta x+(1-\theta)y\in[x,y]\) be the convex combination induced by \(\theta,x,y\). We have shown that \(P([x,y])=[P(x),P(y)]\), so
+    \[P(x_0)\in P([x,y])=[P(x),P(y)].\]
+    Since \(C\) is convex and \(P(x),P(y)\in C\), the line segment \([P(x),P(y)]\) is a subset of \(C\). Hence \(P(x_0)\in C\Rightarrow x_0\in P^{-1}(C)\).
+\end{proof}
+
+\begin{definition}[Linear-fractional function]
+    A \textnormal{linear-fractional function} \(f:\R^n\to\R^m\) is of the form
+    \[f(x)=\frac{Ax+b}{c^Tx+d},\quad\dom f=\left\{x\mid c^Tx+d>0\right\}.\]
+    It is the composition of an affine function \(g\) and the perspective function \(P\), where
+    \[g(x)=\bvec{A\\c^T}x+\bvec{b\\d}.\]
+\end{definition}
+
+The following two propositions are easy to see by viewing a linear-fractional function as the composition of an affine function and a preserving function.
+
+\begin{proposition}
+    The image of a convex set under a linear-fractional function is convex.
+\end{proposition}
+
+\begin{proposition}
+    The inverse image of a convex set a linear-fractional function is convex.
+\end{proposition}
+
+\section{Generalized inequalities}
+
+\begin{definition}[Proper cone]
+    A cone \(K\subseteq\R^n\) is said to be a \textnormal{proper cone} if
+    \begin{itemize}
+        \item \(K\) is convex.
+        \item \(K\) is closed (contains its boundary).
+        \item \(K\) is solid (has nonempty interior).
+        \item \(K\) is pointed (contains no line, or equivalently, \(\pm x\in K\Rightarrow x=0\)).
+    \end{itemize}
+\end{definition}
+
+\begin{definition}[Generalized inequalities]
+    The generalized inequalities on \(\R^n\) can be defined by a proper cone \(K\subseteq\R^n\) as:
+    \[x\preceq_K y\quad\iff\quad y-x\in K.\]
+    \[x\prec_K y\quad\iff\quad y-x\in\inter K.\]
+\end{definition}
+
+\begin{example}
+    The componentwise inequality is the generalized inequality defined by \(K=\R_+^n\), which is the nonnegative orthant.
+\end{example}
+
+\begin{example}
+    The generalized inequality defined by the positive semi-definite cone \(K=\mathbb S_+^n\) is
+    \[X\preceq_{\mathbb S_+^n}Y\quad\iff\quad Y-X\in\mathbb S_+^n.\]
+\end{example}
+
+\begin{proposition}
+    The generalized inequality \(\preceq_K\) defined by a proper cone \(K\) is an ordering relation.
+\end{proposition}
+\begin{proof}
+    \begin{enumerate}
+        \item Reflectivity: For any \(x\in\R^n\), \(x\preceq_K x\) because \(x-x=0\in K\).
+        \item Transitivity: If \(x\preceq_K y\) and \(y\preceq_K z\), then \(z-x=(z-y)+(y-x)\in K\) because \(K\) is a convex cone.
+        \item Antisymmetry: If \(x\preceq_K y\) and \(y\preceq_K x\), then \(\pm(x-y)\in K\Rightarrow x-y=0\Rightarrow x=y\).
+    \end{enumerate}
+\end{proof}
+
+\begin{proposition}
+    The generalized inequality \(\preceq_K\) defined by a proper cone \(K\) is preserved under addition, nonnegative scaling and limits.
+\end{proposition}
+\begin{proof}
+    \begin{itemize}
+        \item If \(x\preceq_K y\) and \(u\preceq_K v\), then \((y+v)-(x+u)=(y-x)+(v-u)\in K\) because \(K\) is a convex cone.
+        \item If \(x\preceq_K y\), then \(\alpha x\preceq_K\alpha y\) for any scalar \(\alpha\geqslant 0\) because \(\alpha y-\alpha x=\alpha(y-x)\in K\).
+        \item We first show that if \(x_n\in K\) for every \(n\in\N\) and \(\lim_{n\to\infty}x_n\) exists, then \(x=\lim_{n\to\infty}x_n\in K\). Assume that \(x\notin K\). Since \(K\) is closed, there exists \(u\in K\) such that \(\norm{x-u}_2=\min_{v\in K}\norm{x-v}_2\). Take \(\varepsilon=\frac12\norm{x-u}_2\), then there exists \(N\in\N\) such that for every \(n>N\) we have \(\norm{x_n-x}_2<\frac12\norm{x-u}_2\). This shows that \(\norm{x-x_n}_2<\norm{x-v}_2\) for every \(v\in K\), so \(x_n\notin K\) for \(n>N\), a contradiction.\par
+        Then we are done by definition of generalized inequality and noting that \(\lim_{n\to\infty}y_n-\lim_{n\to\infty}x_n=\lim_{n\to\infty}(y_n-x_n)\).
+    \end{itemize}
+\end{proof}
+
+\begin{definition}[Minimum element]
+    \(x\in S\) is the \textnormal{minimum element} of \(S\) with respect to \(\preceq_K\) if \(x\preceq_K y\) holds for every \(y\in S\).
+\end{definition}
+
+\begin{definition}[Minimal element]
+    \(x\in S\) is the \textnormal{minimal element} of \(S\) with respect to \(\preceq_K\) if for every \(y\in S\) with \(y\preceq_K x\), we have \(y=x\).
+\end{definition}
+
+\begin{remark}
+    The minimum element of a set with respect to a generalized inequality is unique, and it is also a minimal element.
+\end{remark}
+
+\section{Separating and supporting hyperplanes}
+
+\begin{theorem}[Separating hyperplane]
+    Suppose \(C\) and \(D\) are nonempty disjoint convex sets. Then there exist \(a\neq 0\) and \(b\) such that \(a^Tx\geqslant b\) for all \(x\in C\) and \(a^Tx\leqslant b\) for all \(x\in D\). The hyperplane \(\{x\mid a^Tx=b\}\) is called the \textnormal{separating hyperplane} for the sets \(C\) and \(D\).
+\end{theorem}
+
+\begin{proposition}\label{separating-hyperplane-expr2}
+    For nonempty disjoint convex sets \(C\) and \(D\), the set \(F=\{x-y\mid x\in C,y\in D\}\) is a convex set that does not contain \(0\). There exist \(a\neq 0\) such that \(a^Tx\geqslant 0\) holds for every \(x\in F\). This is equivalent to the separating hyperplane theorem.
+\end{proposition}
+
+\begin{theorem}[Supporting hyperplane]
+    For any nonempty convex set \(C\) and any \(x_0\in\bd C\), there exists a supporting hyperplane \(\{x\mid a^Tx=a^Tx_0\}\), for some \(a\neq 0\), to \(C\) at the point \(x_0\).
+\end{theorem}
+\begin{proof}
+    If the interior of \(C\) is nonempty, then the result follows immediately from applying the separating hyperplane theorem to \(\{x_0\}\) and \(\inter C\). If the interior of \(C\) is empty, then \(C\) must be contained in an affine set with dimension strictly less than \(n\). Then any hyperplane containing this affine set contains \(C\), which is a trivial supporting hyperplane.
+\end{proof}
+
+Now we prove the separating hyperplane theorem expressed in \ref{separating-hyperplane-expr2}.
+
+\begin{lemma}\label{closure-convex}
+    The closure of a convex set is convex.
+\end{lemma}
+\begin{proof}
+    Suppose \(C\) is a convex set. We will show that for any \(x,y\in\cl C\) and \(\theta\in[0,1]\), \(x_0=\theta x+(1-\theta)y\in\cl C\), or equivalently any neighborhood of \(x_0\) intersects \(C\). Let \(O\) be an open neighborhood of \(x_0\). Consider the function \(g(u,v)=\theta u+(1-\theta)v\). Since \(g(x,y)=x_0\in O\) and that \(g(\cdot)\) is continuous, there exist open sets \(U\) and \(V\) such that \(g(U,V)\subseteq O\) and that \(x\in U,y\in V\). Since \(x,y\in\cl C\), we can take \(x_0\in U\cap C\) and \(y_0\in V\cap C\) so that \(g(x_0,y_0)\in C\). Since \(g(x_0,y_0)\in O\), we can see that \(O\cap C\neq\varnothing\), so \(\cl C\) is convex.
+\end{proof}
+
+\begin{proof}[Proof of Proposition \ref{separating-hyperplane-expr2}]
+    First, we prove the separating hyperplane theorem for the case where the closure of the convex set \(F\) does not contain \(0\). We have shown in Lemma \ref{closure-convex} that the closure \(\cl F\) is convex. Now take \(a=\arg\min_{u\in\cl F}\norm{u}_2\neq 0\). Assume that there exists \(x\in\cl F\) such that \(x^Ta\leqslant 0\). Consider \(f(\theta)=\norm{\theta a+(1-\theta)x}_2^2\). We have that
+    \[\begin{aligned}
+        f^\prime(\theta)
+        &=\frac{d}{d\theta}\left(\theta a+(1-\theta)x\right)^T\left(\theta a+(1-\theta)x\right)\\
+        &=2\theta\norm a_2^2+2(1-\theta)\norm x_2^2+2\left(1-2\theta\right)a^Tx.
+    \end{aligned}\]
+    When \(\theta=1\) we have \(f^\prime(1)=2a^Ta-2a^Tx>0\). Therefore, there exists \(\xi\in[0,1]\) such that \(\norm{\xi a+(1-\xi)x}_2<\norm a_2\), while \(\xi a+(1-\xi)x\in\cl F\) due to the convexity of \(\cl F\). This contradicts the fact that \(a=\arg\min_{u\in\cl F}\norm u_2\). From this we have in fact proved the strict separating hyperplane theorem for this case.\par
+    Now we consider the case where \(\cl F\) contains \(0\). Suppose the affine dimension of \(F\) is \(m\). Take the maximum set of linearly independent vectors of \(F\), which is \(\{v_1,\cdots,v_m\}\). Let \(w=-v_1-\cdots-v_m\). We claim that \(\forall\alpha>0\) the point \(\alpha w\) is not in \(\cl F\). Assume that there exists \(\alpha>0\) such that \(\alpha w\in\cl F\). Take a sequence \(\left\{w^{(n)}\right\}\) in \(C\) which converges to \(\alpha w\). Let \(w^{(n)}=\lambda_1^{(n)}v_1+\cdots+\lambda_m^{(n)v_m}\) for some coefficients \(\lambda_1^{(n)},\cdots,\lambda_m^{(n)}\). Since \(\alpha>0\) and that \(\left\{w^{(n)}\right\}\) converges to \(\alpha w\), there exists \(n_0\in\N\) such that \(\lambda_1^{(n_0)},\cdots,\lambda_m^{(n_0)}<0\). Then \(w^{(n_0)}=\lambda_1^{(n_0)}v_1+\cdots+\lambda_m^{(n_0)}v_m\), which implies that
+    \[0=\frac{1}{1-\sum_{i=1}^m\lambda_i^{(n_0)}}\left(w^{(n_0)}-\lambda_1^{(n_0)}-\cdots-\lambda_m^{(n_0)}\right).\]
+    The right-hand side of the equation above is an convex combination of \(w^{(n_0)},v_1,\cdots,v_m\). Since \(w^{(n_0)},v_1,\cdots,v_m\) are all in \(F\), we obtain \(0\in F\).\par
+    Take \(\alpha_n=1/n\) and \(F_n=F-\alpha_nw=\left\{x-\alpha_nw\mid x\in F\right\}\). Then \(F_n\) is a convex set whose closure does not contain \(0\). As what we have shown, there exist \(\xi_n\) such that \(\forall x\in\cl F_n\), \(\xi_n^Tx>0\). Without loss of generosity, we can assume that \(\left\{\xi_n\right\}\) is bounded, so that there exists a convergent subsequence \(\left\{\xi_{n_k}\right\}\) which converges to \(\xi\) for some \(\xi\neq 0\), according to the Bolzano-Weierstrass' Theorem. Therefore, for every \(x\in F\) we have
+    \[\xi^Tx=\left(\lim_{k\to\infty}\xi_{n_k}\right)^Tx=\lim_{k\to\infty}\xi_{n_k}^T\left(x-\alpha_{n_k}w\right)\geqslant 0.\]
+\end{proof}
+
+\end{document}

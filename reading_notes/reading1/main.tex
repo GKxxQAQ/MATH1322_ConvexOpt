@@ -1,0 +1,251 @@
+\documentclass[12pt]{article}
+
+\usepackage{../conopdefs}
+\usepackage[margin = 1in]{geometry}
+\usepackage{euler, bm}
+
+\title{Convex Optimization: Reading Notes 1}
+\author{GKxx}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Least-squares problems}
+
+A least-squares problems is an optimization problem of the form
+\[\min\quad f(x)=\norm{Ax-b}_2^2=\sum_{i=1}^k(a_i^Tx-b_i)^2,\]
+where \(A\in\R^{k\by n}\) with \(k\geqslant n\), and \(a_i^T\) are the rows of \(A\), and the vector \(x\in\R^n\) is the optimization variable. The gradient of the objective function is
+\[\nabla f(x)=\nabla\left((Ax-b)^T(Ax-b)\right)=2A^TAx-2A^Tb.\]
+Setting this to zero yields \(A^TAx=A^Tb\). So the analytical solution to the least-squares problem, if \(A^TA\) is invertible, is \(x=(A^TA)^{-1}A^Tb\).
+
+\begin{definition}[Moore-Penrose generalized inverse]
+    For \(A\in\R^{k\by n}\), consider the singular value decomposition \(A=U\Sigma V^T\), as well as the thin SVD \(A=\bar U\bar\Sigma\bar V^T\). Define \(A^\dagger=\bar V\bar\Sigma^{-1}\bar U^T\), or \(A^\dagger=V\Sigma^\dagger U^T\), where \(\Sigma^\dagger\) is obtained from \(\Sigma\) by first replacing each nonzero singular value with its inverse and then transposing. The matrix \(A^\dagger\) is called the \textnormal{Moore-Penrose generalized inverse}.
+\end{definition}
+
+\begin{remark}
+    In the SVD of \(A\in\R^{k\by n}\), \(U=\bvec{\bar U & \tilde U}\) and \(V=\bvec{\bar V & \tilde V}\), where \(\bar U,\tilde U,\bar V\) and \(\tilde V\) are the orthonormal bases of \(\Range A,\Null{A^T},\Range{A^T}\) and \(\Null A\), respectively.
+\end{remark}
+
+\begin{lemma}
+    \(\Range{A^\dagger}=\Range{A^T}\).
+\end{lemma}
+\begin{proof}
+    \(A^\dagger=\bar V\bar\Sigma^{-1}\bar U^T\Rightarrow\Range{A^\dagger}\subseteq\Range{\bar V}\). Moreover, \(\bar V=A^\dagger\bar U\bar\Sigma\Rightarrow\Range{\bar V}\subseteq\bar{A^\dagger}\). Therefore \(\Range{A^\dagger}=\Range{\bar V}\). Since \(\bar V\) is the orthonormal basis of \(\Range{A^T}\), we obtain \(\Range{A^\dagger}=\Range{A^T}\).
+\end{proof}
+
+\begin{lemma}\label{lemma-eq-sol}
+    If the linear system of equations \(Ax=b\) is consistent, then \(A^\dagger b\) is the unique solution of minimal Euclidean norm.
+\end{lemma}
+\begin{proof}
+    First check that \(A\left(A^\dagger b\right)=b\). Since the system is consistent, \(b\in\Range A\) and we have that
+    \[A\left(A^\dagger b\right)=\bar U\bar\Sigma\bar V^T\bar V\bar\Sigma^{-1}\bar U^Tb=\bar U\bar U^Tb=\Pi_{\Range A,\Range A^\perp}(b)=b,\]
+    where \(\Pi_{S,T}(x)\) is the projection of \(x\) onto \(S\) along \(T\). Now let \(A^\dagger b+\xi\) be any other solution, where \(\xi\in\Null A\). We have that
+    \[\norm{A^\dagger b+\xi}_2^2=\left(A^\dagger b+\xi\right)^T\left(A^\dagger b+\xi\right)=\norm{A^\dagger b}_2^2+\norm{\xi}_2^2+2\xi^TA^\dagger b.\]
+    Here \(A^\dagger b\in\Range{A^\dagger}=\Range{A^T}\), while \(\xi\in\Null A=\Range{A^T}^\perp\), so \(\xi^TA^\dagger b=0\). Therefore
+    \[\norm{A^\dagger b+\xi}_2^2=\norm{A^\dagger b}_2^2+\norm{\xi}_2^2>\norm{A^\dagger b}_2^2.\]
+\end{proof}
+
+\begin{proposition}
+    The unique solution of minimal Euclidean norm to the least-squares problem is \(A^\dagger b\).
+\end{proposition}
+\begin{proof}
+    We have known that the solution to the least-squares problem must satisfy \(A^TAx=A^Tb\). Note that \(A^TA=\bar V\bar\Sigma\bar U^T\bar U\bar\Sigma\bar V^T=\bar V\bar\Sigma^2\bar V^T\), so the Moore-Penrose generalized inverse of \(A^TA\) is
+    \[\left(A^TA\right)^\dagger=\bar V\bar\Sigma^{-2}\bar V^T.\]
+    From Lemma \ref{lemma-eq-sol} we know that the unique solution of minimal Euclidean norm is
+    \[\left(A^TA\right)^\dagger A^Tb=\bar V\bar\Sigma^{-2}\bar V^T\bar V\bar\Sigma\bar U^Tb=\bar V\bar\Sigma^{-1}\bar U^Tb=A^\dagger b.\]
+\end{proof}
+
+\section{Affine sets, convex sets and cones}
+
+\begin{definition}[Affine set]
+    A set \(C\subseteq\R^n\) is \textnormal{affine} if for any \(x_1,x_2\in C\) and \(\theta\in\R\), we have \(\theta x_1+(1-\theta)x_2\in C\).
+\end{definition}
+
+\begin{definition}[Affine combination]
+    The \textnormal{affine combination} of \(k\) points \(x_1,\cdots,x_k\) is the linear combination
+    \[\theta_1x_1+\cdots+\theta_kx_k,\]
+    where \(\theta_1+\cdots+\theta_k=1\).
+\end{definition}
+
+\begin{proposition}
+    The solution set of a system of linear equations is an affine set. Conversely, every affine set can be expressed as the solution set of a system of linear equations.
+\end{proposition}
+\begin{proof}
+    We only show the converse. Suppose \(C\) is an affine set. If \(C=\varnothing\) this is trivial. When \(C\neq\varnothing\), take any \(x_0\in C\) and the set \(V=C-x_0=\left\{x-x_0\mid x\in C\right\}\) is a linear subspace. Suppose \(\dim V^\perp=d\) and \(B=\left\{b_1,\cdots,b_d\right\}\) is a basis for \(V^\perp\). Then
+    \[x\in V\iff \forall\xi\in V^\perp,x\perp\xi\iff \forall i\in[d],x\perp b_i.\]
+    Now define the matrix \(A=\bvec{b_1 & \cdots & b_d}^T\), the \(i\)-th row of which is \(b_i^T\), and then \(x\in V\iff Ax=0\). Therefore \(x\in C\iff Ax=Ax_0\), which shows that \(C\) is the solution set of \(Ax=Ax_0\).
+\end{proof}
+
+\begin{definition}[Affine hull]
+    For a set \(C\subseteq\R^n\), the set of all affine combinations of points in \(C\) is called the \textnormal{affine hull} of \(C\), denoted \(\aff C\):
+    \[\aff C=\left\{\theta_1x_1+\cdots+\theta_kx_k\mid x_1,\cdots,x_k\in C,\theta_1+\cdots+\theta_k=1\right\}.\]
+\end{definition}
+
+\begin{remark}
+    \(\aff C\) is the smallest affine set that contains \(C\). For any affine set \(S\supseteq C\), \(\aff C\subseteq S\).
+\end{remark}
+
+\begin{definition}[Relative interior]
+    The \textnormal{relative interior} of a set \(C\), denoted \(\relint C\), is defined to be its interior relative to \(\aff C\), i.e.
+    \[\relint C=\left\{x\in C\mid\exists r>0\suchthat B(x,r)\cap\aff C\subseteq C\right\}.\]
+    Here \(B(x,r)\) is the ball of radius \(r\) and center \(x\) defined by any norm.
+\end{definition}
+
+\begin{remark}[Interior]
+    The \textnormal{interior} of a set \(C\)
+    \[\left\{x\in C\mid\exists r>0\suchthat B(x,r)\subseteq C\right\}\]
+    is contained in the set \(\relint  C\).
+\end{remark}
+
+\begin{proposition}
+    All norms define the same relative interior.
+\end{proposition}
+\begin{proof}[Proof Sketch]
+    We can show that there exists nonnegative constants \(c\) and \(d\) such that
+    \[c\norm{x}\leqslant\norm{x}_1\leqslant d\norm{x}\]
+    holds for every \(x\in\R^n\), no matter what norm \(\norm{\cdot}\) is chosen. Here \(\norm{\cdot}_1\) is the \(\ell_1\)-norm. In that sense, all norms are equivalent in a vector space.
+\end{proof}
+
+\begin{definition}[Cone]
+    A set \(C\subseteq\R^n\) is a \textnormal{cone} if \(\theta x\in C\) for every \(x\in C\) and \(\theta\geqslant 0\).
+\end{definition}
+
+\begin{definition}[Conic combination]
+    The \textnormal{conic combination} of \(k\) points \(x_1,\cdots,x_k\in\R^n\) is of the form
+    \[\theta_1x_1+\cdots+\theta_kx_k,\]
+    where \(\theta_1,\cdots,\theta_k\geqslant 0\).
+\end{definition}
+
+\begin{remark}
+    The \textnormal{convex combination} is both a conic combination and an affine combination.
+\end{remark}
+
+\begin{definition}[Convex cone]
+    The set of \textnormal{convex cones} is the intersection of the set of convex sets and that of cones.
+\end{definition}
+
+\begin{proposition}
+    \(C\) is a convex cone if and only if \(C\) contains all conic combinations of points in itself.
+\end{proposition}
+\begin{proof}
+    \(\Leftarrow\): Suppose \(C\) contains all conic combinations of points in itself, i.e. for every \(x_1,x_2\in C\) and \(\theta_1,\theta_2\geqslant 0\) we have \(\theta_1x_1+\theta_2x_2\in C\). Set \(\theta_2=0\) and we obtain that \(\forall\theta_1\geqslant 0,\theta_1x_1\in C\), so \(C\) is a cone. Setting \(\theta_1+\theta>0\) yields
+    \[\frac{\theta_1}{\theta_1+\theta_2}x_1+\frac{\theta_2}{\theta_1+\theta_2}x_2=\frac{1}{\theta_1+\theta_2}\left(\theta_1x_1+\theta_2x_2\right)\in C,\]
+    which means that \(C\) is a convex set. Hence \(C\) is a convex cone.\par
+    \(\Rightarrow\): For a convex cone \(C\), suppose \(x_0=\theta_1x_1+\cdots+\theta_kx_k\) is a conic combination of \(k\) points \(x_1,\cdots,x_k\in C\), where \(\theta_1,\cdots,\theta_k\geqslant 0\). If \(\Theta=\theta_1+\cdots+\theta_k=0\), then all the \(\theta_i\)'s are zero and \(x_0=0\in C\) is obvious. When \(\Theta>0\), we know that
+    \[\frac{1}{\Theta}x_0=\frac{\theta_1}{\Theta}x_1+\cdots+\frac{\theta_k}{\Theta}x_k\in C\]
+    since \(C\) is convex, noting that
+    \[\frac{\theta_1}{\Theta}+\cdots+\frac{\theta_k}{\Theta}=1.\]
+    Since \(C\) is a cone, \(x_0\) is also contained in \(C\).
+\end{proof}
+
+\section{Balls, ellipsoids and norm cones}
+
+\begin{definition}[Norm ball]
+    A \textnormal{norm ball} in \(\R^n\) has the form
+    \[B(x_c,r)=\left\{x\mid\norm{x-x_c}\leqslant r\right\},\]
+    where \(r>0\). Here \(\norm{\cdot}\) is any norm.
+\end{definition}
+
+\begin{definition}[Euclidean ball]
+    A \textnormal{Euclidean ball} is a norm ball defined by the Euclidean norm \(\norm{\cdot}_2\).
+\end{definition}
+
+\begin{remark}
+    \(B(x_c,r)=\left\{x_c+ru\mid \norm u_2\leqslant 1\right\}\).
+\end{remark}
+
+\begin{proposition}
+    A norm ball is convex.
+\end{proposition}
+\begin{proof}
+    Suppose \(x_1,x_2\in B(x_c,r)\). Then for any \(0\leqslant\theta\leqslant 1\),
+    \[\begin{aligned}
+        \norm{\theta x_1+(1-\theta)x_2-x_c}
+        &= \norm{\theta(x_1-x_c)+(1-\theta)(x_2-x_c)}\\
+        &\leqslant \theta\norm{x_1-x_c}+(1-\theta)\norm{x_2-x_c}\\
+        &\leqslant \theta r+(1-\theta)r=r.
+    \end{aligned}\]
+    Therefore the convex combination \(\theta x_1+(1-\theta)x_2\) is also contained in \(B(x_c,r)\).
+\end{proof}
+
+\begin{definition}[Euclidean ellipsoid]
+    A \textnormal{Euclidean ellipsoid} in \(\R^n\) has the form
+    \[\mathcal E(x_c,P)=\left\{x\mid (x-x_c)^TP^{-1}(x-x_c)\leqslant 1\right\},\]
+    where \(x_c\in\R^n\) is its \textnormal{center} and \(P\in\mathbb S^n_{++}\) determines how far the ellipsoid extends in every direction from \(x_c\). The lengths of the semi-axes of \(\mathcal E(x_c,P)\) are given by \(\sqrt{\lambda_i}\), where \(\lambda_i\)'s are the eigenvalues of \(P\).
+\end{definition}
+
+\begin{remark}
+    For \(r>0\), \(\mathcal E(x_c,r^2I)\) is the Euclidean ball \(B(x_c,r)\).
+\end{remark}
+
+\begin{remark}
+    \(\mathcal E(x_c,P)=\left\{x_c+Au\mid \norm u_2\leqslant 1\right\}\), where \(A=P^{1/2}\) is defined by first diagonalizing \(P=Q\Lambda Q^T\) and then taking \(A=Q\Lambda^{1/2}Q^T\). \(A\) is also symmetric and positive definite.
+\end{remark}
+
+\begin{proposition}
+    A Euclidean ellipsoid is convex.
+\end{proposition}
+\begin{proof}
+    For a Euclidean ellipsoid \(\mathcal E=\left\{x_c+Au\mid\norm u_2\leqslant 1\right\}\), consider any \(x_c+Au_1,x_c+Au_2\in\mathcal E\) and \(\theta\in[0,1]\), the convex combination induced by which satisfies
+    \[\theta(x_c+Au_1)+(1-\theta)(x_c+Au_2)=x_c+A(\theta u_1+(1-\theta)u_2),\]
+    and by triangle inequality we have
+    \[\norm{\theta u_1+(1-\theta)u_2}_2\leqslant\theta\norm{u_1}_2+(1-\theta)\norm{u_2}_2\leqslant 1.\]
+    Therefore the convex combination is contained in \(\mathcal E\).
+\end{proof}
+\begin{proof}[Proof by convex function]
+    For a Euclidean ellipsoid \(\mathcal E(x_c,P)\), consider the function \(f(x)=(x-x_c)^TP^{-1}(x-x_c)\). \(f\) is convex because \(\nabla^2f(x)=2P^{-1}\succ 0\). Then for every \(x_1,x_2\in\mathcal E(x_c,P)\) and every \(\theta\in[0,1]\), we have
+    \[\begin{aligned}
+        f(\theta x_1+(1-\theta)x_2)
+        &\leqslant \theta f(x_1)+(1-\theta)f(x_2)\\
+        &\leqslant \theta+(1-\theta)=1.
+    \end{aligned}\]
+    Therefore the convex combination \(\theta x_1+(1-\theta)x_2\) is contained in \(\mathcal E(x_c,P)\), so \(\mathcal E(x_c,P)\) is convex.
+\end{proof}
+
+\begin{question}
+    The inequality
+    \[(x-x_c)^TP^{-1}(x-x_c)\leqslant 1\]
+    can be rewritten as
+    \[1-(x-x_c)^TP^{-1}(x-x_c)\geqslant 0,\]
+    the left-hand side of which is the \textnormal{Schur complement of} the matrix
+    \[S=\begin{bmatrix}
+        P & x-x_c\\
+        (x-x_c)^T & 1
+    \end{bmatrix},\]
+    so the inequality holds if and only if \(S\in\mathbb S^n_+\). What can we obtain with this?
+\end{question}
+
+\begin{definition}[Norm cone]
+    The \textnormal{norm cone} associated with the norm \(\norm{\cdot}\) is the set
+    \[C=\left\{(x,t)\mid \norm x\leqslant t\right\}\subseteq\R^{n+1}.\]
+\end{definition}
+
+\begin{proposition}
+    A norm cone is a convex cone.
+\end{proposition}
+\begin{proof}
+    We will show the convexity of a norm cone \(C=\left\{(x,t)\mid \norm x\leqslant t\right\}\). For every \((x_1,t_1),\allowbreak(x_2,t_2)\in C\) and \(\theta\in[0,1]\),
+    \[\norm{\theta x_1+(1-\theta)x_2}\leqslant\theta\norm{x_1}+(1-\theta)\norm{x_2}\leqslant\theta t_1+(1-\theta)t_2.\]
+    Therefore the convex combination \(\theta(x_1,t_1)+(1-\theta)(x_2,t_2)\in C\).
+\end{proof}
+
+\begin{definition}[Second-order cone]
+    A \textnormal{second-order cone} is the norm cone defined by the Euclidean norm. It is also called the \textnormal{quadratic cone}, the \textnormal{Lorentz cone} or the \textnormal{ice-cream cone}.
+\end{definition}
+
+\begin{definition}[Positive semidefinite cone]
+    The set \(\mathbb S^n_+\), which denotes the set of all positive semidefinite matrices, induces a \textnormal{positive semidefinite cone}.
+\end{definition}
+
+\begin{proposition}
+    \(\mathbb S^n_+\) is a convex cone.
+\end{proposition}
+\begin{proof}
+    Since for any \(A\in\mathbb S^n_+\) and any \(\theta\geqslant 0\), \(\theta A\) is also positive semidefinite, \(\mathbb S^n_+\) is a cone. Moreover, for any \(\theta\in[0,1]\) and every \(A,B\in\mathbb S^b_+\),
+    \[x^T\left(\theta A+(1-\theta)B\right)x=\theta x^TAx+(1-\theta)x^TBx\geqslant 0\]
+    holds for every vector \(x\), so \(\theta A+(1-\theta)B\in\mathbb S^n_+\). This shows the convexity.
+\end{proof}
+
+\end{document}

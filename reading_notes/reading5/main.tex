@@ -1,0 +1,235 @@
+\documentclass[12pt]{article}
+
+\usepackage{../conopdefs}
+\usepackage[margin = 1in]{geometry}
+\usepackage{euler, bm}
+
+\title{Convex Optimization: Reading Notes 5}
+\author{GKxx}
+\date{May 11, 2022}
+
+\begin{document}
+
+\maketitle
+
+\section{Triangular factorizations}
+
+\begin{definition}[\(LU\) factorization]
+    Let \(A\in\C^{n\by n}\). A presentation \(A=LU\), in which \(L\in\C^{n\by n}\) is lower triangular and \(U\in\C^{n\by n}\) is upper triangular, is called an \textnormal{\(LU\) factorization} of \(A\).
+\end{definition}
+
+\begin{theorem}[Row inclusion]\label{thm:rowinclusion}
+    Let \(A\in\C^{n\by n}\) be given. \(A\) has an \(LU\) factorization in which \(L\) is nonsingular if and only if \(A\) has the \textnormal{row inclusion property}: For each \(i=1,\cdots,n-1\), \(A\left[\left\{i+1;1,\cdots,i\right\}\right]\) is a linear combination of the rows of \(A\left[\left\{1,\cdots,i\right\}\right]\).
+\end{theorem}
+
+Here we use \(A\left[\left\{i+1;1,\cdots,i\right\}\right]\) to denote the vector \(\bvec{a_{(i+1)1} & a_{(i+1)2} & \cdots & a_{(i+1)i}}\), where \(A=\left[a_{ij}\right]_{i,j=1}^n\).
+
+\begin{remark}[Leading principal submatrix]
+    For \(A\in\C^{n\by n}\), the \(i\)-th \textnormal{leading principal submatrix} of \(A\), denoted \(A\left[\left\{1,\cdots,i\right\}\right]\), is the submatrix obtained from \(A\) by deleting the last \(n-i+1\) rows and columns.
+\end{remark}
+
+The proof of Theorem \ref{thm:rowinclusion} is as follows.
+
+\begin{proof}
+    Suppose \(A=LU\in\C^{n\by n}\) is the \(LU\) factorization with \(L\) nonsingular. First we show that \(A\left[\left\{n;1,\cdots,n-1\right\}\right]\) is the linear combination of the rows of \(A\left[\left\{1,\cdots,n-1\right\}\right]\). Partition \(A,L\) and \(U\) as
+    \[A=\begin{bmatrix}
+        A_{11} & A_{12}\\
+        A_{21} & A_{22}
+    \end{bmatrix},\quad L=\begin{bmatrix}
+        L_{11} & 0\\
+        L_{21} & L_{22}
+    \end{bmatrix},\quad U=\begin{bmatrix}
+        U_{11} & U_{12}\\
+        0 & U_{22}
+    \end{bmatrix},\]
+    where \(A_{11},L_{11},U_{11}\in\C^{(n-1)\by(n-1)}\). Since \(A=LU\), we have \(A_{21}=L_{21}U_{11}=L_{21}L_{11}^{-1}L_{11}U_{11}\), and \(A_{11}=L_{11}U_{11}\). Therefore \(A_{21}=\left(L_{21}L_{11}^{-1}\right)A_{11}\), which represents \(A_{21}=A\left[\left\{n;1,\cdots,n-1\right\}\right]\) as the linear combination of the rows of \(A\left[\left\{1,\cdots,n-1\right\}\right]\). Moreover, since \(A=LU\), for every \(i=1,\cdots,n\) we have
+    \[A\left[\left\{1,\cdots,i\right\}\right]=L\left[\left\{1,\cdots,i\right\}\right]U\left[\left\{1,\cdots,i\right\}\right].\]
+    Applying what we have obtained to this \(LU\) factorization of every leading principal submatrix of \(A\) verifies the row inclusion property.\par
+    Conversely, if \(A\) has the row inclusion property, we can construct an \(LU\) factorization inductively with \(L\) nonsingular. The cases \(n=1,2\) are easily verified. Now suppose \(A_{11}=L_{11}U_{11}\), where \(L_{11}\) is nonsingular and \(A_{11},L_{11},U_{11}\in\C^{(n-1)\by(n-1)}\). The row inclusion property gives that the row vector \(A_{21}\) is a linear combination of the rows of \(A_{11}\), so there exists \(y\in\C^{n-1}\) such that
+    \[A_{21}=y^TA_{11}=y^TL_{11}U_{11}.\]
+    From \(A_{21}=L_{21}U_{11}\), we get \(L_{21}=y^TL_{11}\). From \(A_{12}=L_{11}U_{12}\) and that \(L_{11}\) is nonsingular, we obtain \(U_{12}=L_{11}^{-1}A_{12}\). Let \(L_{22}=1\) and \(U_{22}=A_{22}-L_{21}U_{12}\). In this way, we obtain an \(LU\) factorization of \(A\), in which \(L\) is nonsingular, from the \(LU\) factorization of \(A_{11}\).
+\end{proof}
+
+\begin{remark}\label{rmk:columninclusion}
+    Similarly we can define the \textnormal{column inclusion property}. \(A\) has an \(LU\) factorization with nonsingular \(U\) if and only if the column inclusion property holds. This follows from considering the \(LU\) factorization of \(A^T\).
+\end{remark}
+
+\begin{corollary}\label{cor:LU}
+    Suppose that \(A\in\C^{n\by n}\) and \(\rank A=k\). If \(A\left[\left\{1,\cdots,j\right\}\right]\) is nonsingular for all \(j=1,\cdots,k\), then \(A\) has an \(LU\) factorization. Furthermore, either factor may be chosen to be unit triangular; both \(L\) and \(U\) are nonsingular if and only if \(k=n\).
+\end{corollary}
+\begin{proof}
+    For \(A\in\C^{n\by n}\) with \(\rank A=k\) such that \(A\left[\left\{1,\cdots,j\right\}\right]\) is nonsingular for all \(j=1,\cdots,k\), we first verify that \(A\) has both the row inclusion and column inclusion properties. For \(j=1,\cdots,k\), since \(A\left[\left\{1,\cdots,j\right\}\right]\) is nonsingular, the rows of \(A\left[\left\{1,\cdots,j\right\}\right]\) are linearly independent, so they span \(\C^j\) and \(A\left[\left\{j+1;1,\cdots,j\right\}\right]\) is certainly in it. For \(j>k\), since \(\rank A=k\), the rows of \(A\left[\left\{1,\cdots,j\right\}\right]\) must span \(\C^j\), and \(A\left[\left\{j+1;1,\cdots,j\right\}\right]\) is in it. This shows the row inclusion property, and similarly the column inclusion property also holds. From Theorem \ref{thm:rowinclusion} and Remark \ref{rmk:columninclusion} it follows that \(A\) has an \(LU\) factorization where either \(L\) or \(U\) may be nonsingular.\par
+    Suppose \(A=LU\) and \(L\) is nonsingular, which means that \(L\) has nonzero diagonal elements \(\ell_{11},\ell_{22},\cdots,\ell_{nn}\). Let \(D=\diag\left(\ell_{11},\cdots,\ell_{nn}\right)\) which is nonsingular, and let \(L=L^\prime D\) so that \(L^\prime\) is unit lower triangular. Note that \(U^\prime=DU\) is still upper triangular, so we obtain a new \(LU\) factorization of \(A=L^\prime U^\prime\) in which the left factor is unit triangular. Similarly, the right factor could also be unit triangular.\par
+    For \(k=n\), the matrix \(A\) is nonsingular, so the other factor must be nonsingular if either factor is nonsingular. Conversely, for both \(L\) and \(U\) nonsingular, \(A=LU\) is nonsingular, and therefore has full rank.
+\end{proof}
+
+\begin{corollary}[\(LDU\) factorization]
+    Let \(A=\left[a_{ij}\right]\in\C^{n\by n}\) be given. Suppose that the leading principal submatrix \(A\left[\left\{1,\cdots,i\right\}\right]\) is nonsingular for all \(i=1,\cdots,n\). Then \(A=LDU\), in which \(L,D,U\in\C^{n\by n}\), \(L\) is unit lower triangular, \(U\) is unit upper triangular, \(D=\diag\left(d_1,\cdots,d_n\right)\) is diagonal, \(d_1=a_{11}\), and
+    \[d_i=\frac{\det A\left[\left\{1,\cdots,i\right\}\right]}{\det A\left[\left\{1,\cdots,i-1\right\}\right]}.\]
+    The factors \(L,D\) and \(U\) are uniquely determined.
+\end{corollary}
+\begin{proof}
+    From Corollary \ref{cor:LU}, \(A\) must have an \(LU\) factorization \(A=L^\prime U^\prime\) where both \(L^\prime\) and \(U^\prime\) are nonsingular. It is easy to find unit triangular \(L\) and \(U\) such that \(L^\prime=LD_1\) and \(D_2U=U^\prime\), where \(D_1\) and \(D_2\) are diagonal. Then \(A\) has an \(LDU\) factorization \(A=LDU,D=D_1D_2\), and
+    \[\det A\left[\left\{1,\cdots,i\right\}\right]=\det D\left[\left\{1,\cdots,i\right\}\right]=\prod_{j=1}^id_j,\quad i=1,\cdots,n.\]
+    So \(d_1=a_{11}\), and
+    \[d_i=\frac{\det A\left[\left\{1,\cdots,i\right\}\right]}{\det A\left[\left\{1,\cdots,i-1\right\}\right]},\quad i=2,\cdots,n.\]
+    The uniqueness of \(L\) and \(U\) could be proved inductively.
+\end{proof}
+
+\begin{lemma}\label{lem:permute}
+    Let \(A\in\C^{n\by n}\) be nonsingular. Then there is a permutation matrix \(P\in\C^{n\by n}\) such that \(\det\left(\left(P^TA\right)\left[\left\{1,\cdots,j\right\}\right]\right)\neq 0\) for \(j=1,\cdots,n\).
+\end{lemma}
+\begin{proof}
+    Prove by induction on \(n\). The cases \(n=1,2\) are trivial. Suppose that such matrix exists for cases \(1,2,\cdots,n-1\). For a nonsingular \(A\in\C^{n\by n}\), we delete its last column, and the remaining \(n-1\) columns are linearly independent and hence they contain \(n-1\) linearly independent rows. Permute these rows to be the first \(n-1\) rows, and then apply the induction hypothesis to the nonsingular \((n-1)\by(n-1)\) leading principal submatrix. This determines a desired permutation \(P\), and \(P^TA\) is nonsingular.
+\end{proof}
+
+\begin{theorem}[\(PLU\) factorization]
+    For each \(A\in\C^{n\by n}\) there is a permutation matrix \(P\in\C^{n\by n}\), a unit lower triangular \(L\in\C^{n\by n}\) and an upper triangular \(U\in\C^{n\by n}\) such that \(A=PLU\).
+\end{theorem}
+\begin{proof}
+    It suffices to show that there exists a permutation matrix \(Q\) such that \(QA\) has the row inclusion property, and thus has an \(LU\) factorization \(QA=LU\). Let \(P=Q^T\) and we have \(A=PLU\).\par
+    If \(A\) is nonsingular, the desired permutation matrix is guaranteed by Lemma \ref{lem:permute}. Suppose \(A\) is singular, with \(\rank A=k<n\). First we permute the rows of \(A\) so that the first \(k\) rows are linearly independent. This gives that \(A\left[\left\{i+1;1,\cdots,i\right\}\right]\) is a linear combination of the rows of \(A\left[\left\{1,\cdots,i\right\}\right]\) for \(i=k,\cdots,n-1\). If \(A\left[\left\{1,\cdots,k\right\}\right]\) is nonsingular, apply Lemma \ref{lem:permute} again to \(A\left[\left\{1,\cdots,k\right\}\right]\) so that the row inclusion property holds for \(A\left[\left\{1,\cdots,k\right\}\right]\), and thus holds for \(A\). If \(A\left[\left\{1,\cdots,k\right\}\right]\) is singular, apply the same procedure recursively to \(A\left[\left\{1,\cdots,k\right\}\right]\) until either the upper left block is \(0\), or it is nonsingular. Hence the desired permutation matrix exists.
+\end{proof}
+
+\begin{theorem}[\(LPU\) factorization]\label{thm:LPU}
+    For every \(A\in\C^{n\by n}\), there exists a permutation matrix \(P\in\C^{n\by n}\), a unit lower triangular matrix \(L\in\C^{n\by n}\) and an upper triangular matrix \(U\in\C^{n\by n}\) such that \(A=LPU\). Moreover, the factor \(P\) is uniquely determined if \(A\) is nonsingular.
+\end{theorem}
+
+Theorem \ref{thm:LPU} could be proved by induction. The proof is omitted here.
+
+\begin{theorem}[\(LPDU\) factorization]
+    For each nonsingular \(A\in\C^{n\by n}\), there is a unique permutation matrix \(P\), a unique nonsingular diagonal matrix \(D\), a unit lower triangular matrix \(L\), and a unit upper triangular matrix \(U\) such that \(A=LPDU\).
+\end{theorem}
+\begin{proof}
+    Theorem \ref{thm:LPU} guarantees the existence of a unique permutation matrix \(P\), a unit lower triangular matrix \(L\) and a nonsingular upper triangular matrix \(U^\prime\) such that \(A=LPU^\prime\). Let \(D=\diag\left(\diag\left(U^\prime\right)\right)\) so that \(U^\prime=DU\), where \(U\) is unit upper triangular. This shows the existence.\par
+    To show the uniqueness of \(D\), we assume there exists another diagonal matrix \(D_1\), unit lower triangular \(L_1\) and unit upper triangular \(U_1\) such that \(A=L_1PD_1U_1\). Since \(A=LPDU\), we have \(LPDU=L_1PD_1U_1\), and thus
+    \[P^TL_1^{-1}LPD=D_1U_1U^{-1}.\]
+    Sicne the unit lower/upper triangular matrices form a multiplicative group, the main diagonal entries of \(L_1^{-1}L\) and \(U_1U^{-1}\) are all ones. Since \(P\) is a permutation matrix, it is clear that the main diagonal entries of \(P^T(L_1^{-1}L)P\) are also all ones. Hence \(D=D_1\).
+\end{proof}
+
+\section{Cholesky factorization}
+
+\begin{theorem}[Cholesky factorization]
+    Let \(A\in\mathbb S^n\) be given. \(A\) is positive definite if and only if there exists a lower triangular matrix \(L\) with positive diagonal elements such that \(A=LL^T\). Such \(L\) is unique and is called the \textnormal{Cholesky factor} of \(A\).
+\end{theorem}
+\begin{proof}
+    \(\Longleftarrow\): Suppose \(A=LL^T\) in which \(L\) is lower triangular with positive diagonal elements. It follows immediately that \(A\) is positive semidefinite. Since the diagonal elements of \(L\) are all positive, \(L\) and \(L^T\) are nonsingular, so \(A=LL^T\) is nonsingular, and thus positive definite.\par
+    \(\Longrightarrow\): We will show the existence of the Cholesky factor \(L\) by induction on \(n\). The case \(n=1\) is trivial. Suppose this is true up to \(n-1\), and for \(A\in\mathbb S^n\), write
+    \[A=\begin{bmatrix}
+        \alpha & b^T \\ b & A^\prime
+    \end{bmatrix},\quad A^\prime\in\R^{(n-1)\by(n-1)}.\]
+    Decompose this in the form
+    \[A=\begin{bmatrix}
+        1 & 0 \\ \frac1\alpha b & I_{n-1}
+    \end{bmatrix}\begin{bmatrix}
+        \alpha & 0 \\ 0 & A^\prime-\frac{bb^T}{\alpha}
+    \end{bmatrix}\begin{bmatrix}
+        1 & \frac1\alpha b^T \\ 0 & I_{n-1}
+    \end{bmatrix},\]
+    where \(\Delta_A=A^\prime-\frac{bb^T}{\alpha}\) is the \textit{Schur complement} of \(A\). Since \(A\) is positive definite, it follows that the Schur complement \(\Delta_A\) is also positive definite. By induction hypothesis there exists a lower triangular matrix \(L_{\Delta}\) with positive diagonal elements such that \(\Delta_A=L_{\Delta}L_{\Delta}^T\). Therefore
+    \[\begin{aligned}
+        A &= \begin{bmatrix}
+            1 &0 \\ \frac1\alpha b & I_{n-1}
+        \end{bmatrix}\begin{bmatrix}
+            \alpha & 0 \\ 0 & L_{\Delta}L_{\Delta}^T
+        \end{bmatrix}\begin{bmatrix}
+            1 & \frac1\alpha b^T \\ 0 & I_{n-1}
+        \end{bmatrix}\\
+        &= \begin{bmatrix}
+            1 & 0 \\ \frac1\alpha b & I_{n-1}
+        \end{bmatrix}\begin{bmatrix}
+            \sqrt\alpha & 0 \\ 0 & L_{\Delta}
+        \end{bmatrix}\begin{bmatrix}
+            \sqrt\alpha & 0 \\ 0 & L_{\Delta}^T
+        \end{bmatrix}\begin{bmatrix}
+            1 & \frac1\alpha b^T \\ 0 & I_{n-1}
+        \end{bmatrix}\\
+        &= \begin{bmatrix}
+            \sqrt\alpha & 0 \\ \frac{1}{\sqrt\alpha}b & L_{\Delta}
+        \end{bmatrix}\begin{bmatrix}
+            \sqrt\alpha & \frac{1}{\sqrt\alpha}b^T \\ 0 & L_{\Delta}^T
+        \end{bmatrix}
+        = LL^T,
+    \end{aligned}\]
+    where \(L=\begin{bmatrix}
+        \sqrt\alpha & 0 \\ \frac{1}{\sqrt\alpha}b & L_{\Delta}
+    \end{bmatrix}\) is lower-triangular with positive diagonal elements. This shows the existence.\par
+    To prove the uniqueness, suppose \(A=LL^T=KK^T\), where \(K\) is also a Cholesky factor of \(A\). Then \(K^{-1}L=K^T\left(L^T\right)^{-1}\). Since the nonsingular lower triangular matrices form a group, \(K^{-1}L\) is lower triangular and \(K^T\left(L^T\right)^{-1}\) is upper triangular. Therefore \(K^{-1}L=D\) for some diagonal matrix \(D\). For real matrices, take this into \(A=LL^T=KK^T\) and we obtain \(KDD^TK^T=KK^T\), which gives \(DD^T=I\), so \(D=I\). The uniqueness also holds for complex matrices, but the proof is omitted here.
+\end{proof}
+
+\begin{remark}
+    From the proof above, we also obtain a Cholesky factorization algorithm. To find the Cholesky factor of \(A\in\mathbb S_{++}^n\), we only need to compute \(\Delta_A=A^\prime-\frac1\alpha bb^T\), where
+    \[A=\begin{bmatrix}
+        \alpha & b^T \\ b & A^\prime
+    \end{bmatrix},\]
+    which involves \(n^2\) flops (for computing \(bb^T\)), and then recursively find the Cholesky factorization of \(\Delta_A\in\mathbb S_{++}^{n-1}\). So the total number of flops is approximately
+    \[\sum_n n^2=\frac13n^3.\]
+\end{remark}
+
+\section{Matrix inversion lemma}
+
+There are many different versions of the matrix inversion lemma. The \textit{Sherman-Morrison formula} gives that
+\[\left(A+uv^T\right)^{-1}=A^{-1}-\frac{A^{-1}uv^TA^{-1}}{1+v^TA^{-1}u},\]
+where \(A\) is invertible matrix, \(u,v\in\R^n\), \(1+v^TA^{-1}u\neq 0\) and \(A+uv^T\). The \textit{Sherman-Morrison-Woodbury formula} deals with the case of two matrices and gives that
+\[\left(D+VV^T\right)^{-1}=D^{-1}-D^{-1}V\left(I+V^TD^{-1}V\right)^{-1}V^TD^{-1}.\]
+However, the most generalized version is as follows.
+
+\begin{theorem}
+    Suppose \(A,B,C,D\) are matrices, vectors or numbers, such that \(A+BCD\) exists. Suppose \(A,C,C^{-1}+DA^{-1}B\) are invertible. Then \(A+BCD\) is invertible and
+    \[\left(A+BCD\right)^{-1}=A^{-1}-A^{-1}B\left(C^{-1}+DA^{-1}B\right)^{-1}DA^{-1}.\]
+\end{theorem}
+
+The proof involves nothing but fundamental operations of matrices.
+
+\section{Condition number}
+
+The condition number associated with a linear equation \(Ax=b\) gives a bound on how inaccurate the solution \(x\) will be after approximation. Let \(e\) be the error in \(b\). Assuming that \(A\) is a nonsingular matrix, the error in the solution \(A^{-1}b\) is \(A^{-1}e\). Then the ratio of the relative error in the solution to the relative error in \(b\) is.
+\[\frac{\norm{A^{-1}e}/\norm{A^{-1}b}}{\norm e/\norm b}=\frac{\norm{A^{-1}e}}{\norm e}\cdot\frac{\norm b}{\norm{A^{-1}b}}.\]
+The maximum value of the above when \(e,b\neq 0\) is
+\[\begin{aligned}
+    \max_{e,b\neq 0}\frac{\norm{A^{-1}e}}{\norm e}\cdot\frac{\norm b}{\norm{A^{-1}b}}
+    &=\max_{e\neq 0}\frac{\norm{A^{-1}e}}{\norm e}\max_{b\neq 0}\frac{\norm b}{\norm{A^{-1}b}}\\
+    &=\max_{e\neq 0}\frac{\norm{A^{-1}e}}{\norm e}\max_{x\neq 0}\frac{\norm{Ax}}{\norm x}\\
+    &=\matnorm{A^{-1}}\matnorm{A},
+\end{aligned}\]
+where \(\matnorm{\cdot}\) is the matrix norm associated with the vector norm \(\norm{\cdot}\). If \(\norm{\cdot}\) is the Euclidean norm, then
+\[\matnorm{A^{-1}}\matnorm{A}=\frac{\sigma_{\max}(A)}{\sigma_{\min}(A)}.\]
+
+\begin{definition}[Condition number of matrices]
+    The \textnormal{condition number} of a matrix \(A\) is defined as
+    \[\kappa(A)=\begin{cases}
+        \frac{\sigma_{\max}(A)}{\sigma_{\min}(A)},&A\textnormal{ is nonsingular},\\
+        \infty,&A\textnormal{ is singular}.
+    \end{cases}\]
+\end{definition}
+
+\begin{definition}[Width of convex sets]
+    The \textnormal{width} of a convex set \(C\subseteq\R^n\) in the direction \(q\), where \(\norm{q}_2=1\), is defined as
+    \[W(C,q)=\sup_{z\in C}q^Tz-\inf_{z\in C}q^Tz.\]
+\end{definition}
+
+\begin{definition}[Minimum and maximum width]
+    The \textnormal{minimum width} and \textnormal{maximum width} of a convex set \(C\subseteq\R^n\) are given by
+    \[W_{\min}=\inf_{\norm q_2=1}W(C,q),\quad W_{\max}=\sup_{\norm q_2=1}W(C,q).\]
+\end{definition}
+
+\begin{definition}[Condition number of convex sets]
+    The \textnormal{condition number} of a convex set \(C\subseteq\R^n\) is defined as
+    \[\cond(C)=\frac{W_{\max}^2}{W_{\min}^2}.\]
+\end{definition}
+
+Let \(C_\alpha=\left\{x\mid f(x)\leqslant\alpha\right\}\) be the \(\alpha\)-sublevel set. Suppose there exist constants \(m\) and \(M\) such that \(mI\preceq\nabla^2f(x)\preceq MI\). Then
+\[p^\ast+\frac M2\norm{y-x^\ast}_2^2\geqslant f(y)\geqslant p^\ast+\frac m2\norm{y-x^\ast}_2^2.\]
+This shows that \(B_{\textnormal{inner}}\subseteq C_\alpha\subseteq B_{\textnormal{upper}}\), where
+\[B_{\textnormal{inner}}=\left\{y\mid\norm{y-x^\ast}_2\leqslant\sqrt{2\left(\alpha-p^\ast\right)/M}\right\},\]
+\[B_{\textnormal{outer}}=\left\{y\mid\norm{y-x^\ast}_2\leqslant\sqrt{2\left(\alpha-p^\ast\right)/m}\right\}.\]
+Therefore
+\[\cond\left(C_\alpha\right)\leqslant\frac Mm.\]
+From the Taylor's formula we can also see that
+\[f(y)\approx p^\ast+\frac12\left(y-x^\ast\right)^T\nabla^2f(x^\ast)(y-x^\ast),\]
+so for \(\alpha\) close to \(p^\ast\),
+\[C_\alpha\approx\left\{y\mid (y-x^\ast)^T\nabla^2f(x^\ast)(y-x^\ast)\leqslant 2(\alpha-p^\ast)\right\},\]
+which is an ellipsoid with center \(x^\ast\). Therefore
+\[\lim_{\alpha\to p^\ast}\cond(C_\alpha)=\kappa\left(\nabla^2 f(x^\ast)\right).\]
+
+\end{document}

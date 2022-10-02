@@ -1,0 +1,169 @@
+\documentclass[12pt]{article}
+
+\usepackage{../conopdefs}
+\usepackage[margin = 1in]{geometry}
+\usepackage{euler, bm}
+
+\title{Convex Optimization: Reading Notes 6}
+\author{GKxx}
+\date{May 29, 2022}
+
+\begin{document}
+
+\maketitle
+
+\section{Equality constrained minimization}
+
+We consider the minimization problems with only equality constraints, which are of the form
+\begin{equation}\label{eq:equality-constrained}
+    \begin{aligned}
+        \min\quad &f(x)\\
+        \subjectto\quad &Ax=b.
+    \end{aligned}
+\end{equation}
+We may assume that \(f\) is convex and twice continuously differentiable. For the matrix \(A\in\R^{p\by n}\) in the equality constraints, it is assumed that \(\rank A=p<n\). This assumption is reasonable, in the sense that for \(\rank A<p\) or \(p\geqslant n\) some of the rows of \(A\) must be linearly expressible by others, which could be removed.
+
+Suppose the optimal value \(p^\ast\) is finite and attained. The sufficient and necessary condition for \(x^\ast\) to be optimal is that
+\[\begin{cases}
+    x^\ast\in\dom f,\quad Ax^\ast=b,\\
+    \nabla f(x^\ast)+A^T\nu^\ast=0\quad\text{for some }\nu^\ast.
+\end{cases}\]
+The equation \(Ax^\ast=b\) indicates the \textit{primal feasibility}, and \(\nabla f(x^\ast)+A^T\nu^\ast=0\) indicates the \textit{dual feasibility}.
+
+\begin{example}[Equality constrained convex quadratic minimization]
+    The problem of the form in (\ref{eq:equality-constrained}) with objective
+    \[f(x)=\frac12x^TPx+q^Tx+r,\]
+    where \(P\in\mathbb S_+^n\), is the convex quadratic minimization problem with equality constraints.
+\end{example}
+
+The optimality conditions for the convex quadratic problem could be written as
+\[\begin{bmatrix}
+    P&A^T\\A&0
+\end{bmatrix}\begin{bmatrix}
+    x^\ast\\\nu^\ast
+\end{bmatrix}=\begin{bmatrix}
+    -q\\b
+\end{bmatrix}.\]
+The matrix
+\[K=\begin{bmatrix}
+    P&A^T\\A&0
+\end{bmatrix}\]
+is called the \textit{KKT matrix}. When the KKT matrix is nonsingular, there is a unique optimal primal-dual pair \(\left(x^\ast, \nu^\ast\right)\). In fact, the nonsingularity of \(K\) is equivalent to the following statements.
+\begin{enumerate}
+    \item \(\Null P\cap\Null A=0\).
+    \item \(Ax=0,x\neq 0\Rightarrow x^TPx>0\).
+    \item \(F^TPF\succ0\), where \(F\in\R^{n\by(n-p)}\) is a matrix for which \(\Range F=\Null A\).
+    \item \(P+A^TQA\succ 0\) for some \(Q\succeq0\).
+\end{enumerate}
+\begin{proof}
+    Obviously, the first and the second statements are equivalent. The second and the third statements are equivalent in the sense that for all \(Ax=0,x\neq 0\), \(x\) must be of the form \(x=Fy\) where \(y\neq 0\), so that \(x^TPx=y^TF^TPFy>0\).\par
+    Then we show the equivalence of the second and the fourth statements. When the second statement holds, pick \(Q=I\) in the fourth statement and then for every \(x\) we have
+    \[x^T\left(P+A^TQA\right)x=x^TPx+(Ax)^T(Ax)>0,\]
+    so \(P+A^TQA\succ 0\). Conversely, when \(P+A^TQA\succ 0\) holds for some \(Q\succeq 0\), it means that for every \(x\) we have
+    \[x^TPx+x^TA^TQAx>0.\]
+    So for \(Ax=0,x\neq 0\) this gives \(x^TPx>0\). Finally we show that these four statements are equivalent with the nonsingularity of \(K\). For nonsingular \(K\), the equation
+    \[K\begin{bmatrix}
+        x\\0
+    \end{bmatrix}=\begin{bmatrix}
+        Px\\Ax
+    \end{bmatrix}=0\]
+    holds only when \(x=0\), which gives that \(\Null P\cap\Null A=0\). On the other hand, suppose \(K\) is singular, i.e. there exist \(x,z\) not both zero such that
+    \[\begin{bmatrix}
+        P&A^T\\A&0
+    \end{bmatrix}\begin{bmatrix}
+        x\\z
+    \end{bmatrix}=\begin{bmatrix}
+        Px+A^Tz\\Ax
+    \end{bmatrix}=0.\]
+    Multiplying \(Px+A^Tz=0\) on the left by \(x^T\) yields
+    \[x^TPx+(Ax)^Tz=0.\]
+    This reduces to \(x^TPx=0\) when \(Ax=0\), and since \(P\succeq 0\) it follows that \(Px=0\). This is possible only when \(x=0\), because \(\Null P\cap\Null A=0\), and then it leads to \(A^Tz=0\) which implies \(z=0\) for \(\rank A=p\). This contradicts the assumption that \(x\) and \(z\) are not both zero.
+\end{proof}
+
+It is also worth attention that when \(K\) is nonsingular, \(K\) must have \(n\) positive eigenvalues and \(p\) negative eigenvalues. The \(n\) positive eigenvalues are easy to see from the following interlacing theorem.
+
+\begin{theorem}
+    Let \(A\in\C^{n\by n}\) be Hermitian partitioned as
+    \[A=\begin{bmatrix}
+        B&C\\C^\ast&D
+    \end{bmatrix},\quad B\in\C^{m\by m},D\in\C^{(n-m)\by(n-m)},C\in\C^{m\by(n-m)}.\]
+    Then
+    \[\lambda_i(A)\leqslant\lambda_i(B)\leqslant \lambda_{i+n-m}(A)\]
+    for every \(i=1,\cdots,m\). Here \(\lambda_i(X)\) denotes the \(i\)-th smallest eigenvalue of \(X\).
+\end{theorem}
+
+\subsection{Eliminating equality constraints}
+
+One general approach to solving equality constrained problems is to eliminate the equality constraints to reduce the problem to an unconstrained one. For the problem given in the form (\ref{eq:equality-constrained}), one possible way of eliminating the equality constraints is to choose a matrix \(F\in\R^{n\by(n-p)}\) and a vector \(\hat x\in\R^n\) such that
+\[\left\{x\mid Ax=b\right\}=\left\{Fz+\hat x\mid z\in\R^{n-p}\right\}.\]
+We may choose \(\hat x\) to be a solution of \(Ax=b\), and \(F\) is any matrix satisfying
+\[\Range F=\Null A.\]
+Note that the existence of such \(F\) is guaranteed in the convex quadratic problem when the KKT matrix is nonsingular. Then the reduced optimization problem is formed:
+\[\min\quad \tilde f(z)=f(Fz+\hat x).\]
+From its solution \(z^\ast\), the solution of the original problem could be found by \(x^\ast=Fz^\ast+\hat x\).
+
+\section{Newton's method}
+
+The general idea of finding an optimal solution of a problem is through a number of iterations, starting at point \(x^{(0)}\), of the form
+\[x^{(k+1)}=x^{(k)}+t^{(k)}\Delta x^{(k)},\]
+with \(f\left(x^{(k+1)}\right)<f\left(x^{(k)}\right)\). In the iteration equation, \(t^{(k)}\) is called the \textit{step size} and \(\Delta x^{(k)}\) is the \textit{search direction}.
+
+\subsection{Interpretation: second-order approximation}
+
+The Newton's method gives a preferable way of iteration. There are a number of different interpretations of the Newton's step. One way is to derive it from optimizing a second-order approximation problem
+\[\begin{aligned}
+    \min_v\quad & f(x)+\nabla f(x)^Tv+\frac12v^T\nabla^2f(x)v\\
+    \subjectto\quad & A(x+v)=b.
+\end{aligned}\]
+Here the objective is given by the second-order Taylor's formula. Assuming the associated KKT matrix is nonsingular. The optimality conditions for this problem are
+\[\begin{cases}
+    \nabla f(x)+\nabla^2f(x)^Tv+A^T\nu=0,\\
+    Ax+Av=b.
+\end{cases}\]
+Noting that \(Ax=b\), the above conditions could be rewritten as
+\[\begin{bmatrix}
+    \nabla^2f(x) & A^T \\ A & 0
+\end{bmatrix}\begin{bmatrix}
+    v \\ \nu
+\end{bmatrix}=\begin{bmatrix}
+    -\nabla f(x) \\ 0
+\end{bmatrix}.\]
+(Please discriminate between the `\(\nu\)' and `\(v\)' here.) Hence the Newton step \(\Delta x_{nt}\) is characterized by
+\[\begin{bmatrix}
+    \nabla^2f(x) & A^T \\ A & 0
+\end{bmatrix}\begin{bmatrix}
+    \Delta x_{nt} \\ \nu
+\end{bmatrix}=\begin{bmatrix}
+    -\nabla f(x) \\ 0
+\end{bmatrix},\]
+where \(\nu\) is the associated optimal dual variable for the quadratic problem.
+
+\subsection{Interpretation: linearized optimality conditions}
+
+The optimality conditions
+\[\begin{cases}
+    Ax^\ast=b\\
+    \nabla f\left(x^\ast\right)+A^T\nu^\ast=0
+\end{cases}\]
+could be approximated by substituting \(x+\Delta x_{nt}\) for \(x^\ast\) and \(w\) for \(\nu^\ast\), and then replacing the gradient term by its linearized approximation near \(x\). These approximations yield
+\[\begin{cases}
+    A\left(x+\Delta x_{nt}\right)=b,\\
+    \nabla f\left(x+\Delta x_{nt}\right)+A^Tw\approx\nabla f(x)+\nabla^2f(x)\Delta x_{nt}+A^Tw=0.
+\end{cases}\]
+Noting that \(Ax=b\), we obtain
+\[\begin{cases}
+    A\Delta x_{nt}=0,\\
+    \nabla^2f(x)\Delta x_{nt}+A^Tw=-\nabla f(x).
+\end{cases}\]
+
+\subsection{The Newton decrement}
+
+The Newton decrement for the equality constrained problem is defined as
+\[\lambda(x)=\left(\Delta x_{nt}^T\nabla^2f(x)\Delta x_{nt}\right)^{1/2}.\]
+We can relate the Newton decrement to the quantity \(f(x)-\inf_y\tilde f(y)\), where \(\tilde f\) is the second-order approximation of \(f\) at \(x\) given by the Taylor's formula. We have that
+\[f(x)-\inf_y\tilde f(y)=f(x)-\tilde f\left(x+\Delta x_{nt}\right)=\frac12\lambda(x)^2.\]
+Therefore, \(\lambda(x)^2/2\) is an estimation of \(f(x)-p^\ast\). Moreover, \(\lambda(x)\) could also be seen as the norm of \(\Delta x_{nt}\), in the quadratic norm defined by the Hessian
+\[\norm{u}_{\nabla^2f(x)}=\left(u^T\nabla^2f(x)u\right)^{1/2}.\]
+Moreover, \(\Delta x_{nt}\) is also a feasible descent direction
+
+\end{document}

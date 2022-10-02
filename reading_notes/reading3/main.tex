@@ -1,0 +1,367 @@
+\documentclass[12pt]{article}
+
+\usepackage{../conopdefs}
+\usepackage[margin = 1in]{geometry}
+\usepackage{euler, bm}
+
+\title{Convex Optimization: Reading Notes 3}
+\author{GKxx}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Dual cones and generalized inequalities}
+
+\begin{definition}[Dual cone]
+    The \textnormal{dual cone} of a cone \(K\) is defined as
+    \[K^\ast=\left\{y\mid\forall x\in K,y^Tx\geqslant 0\right\}.\]
+\end{definition}
+
+Geometrically, \(y\in K^\ast\) if and only if \(-y\) is the normal of a hyperplane that supports \(K\) at the origin.
+
+\begin{proposition}
+    The dual cone of a linear subspace \(V\subseteq\R^n\) is its orthogonal complement.
+\end{proposition}
+\begin{proof}
+    Note that whenever \(x\in V\), \(-x\) is also contained in \(V\), and by definition we can see \(V^\ast=V^\perp\).
+\end{proof}
+
+\begin{proposition}
+    The \textnormal{nonnegative orthant} \(\R_+^n\) is a self-dual cone, i.e. \(\left(\R_+^n\right)^\ast=\R_+^n\).
+\end{proposition}
+
+\begin{proposition}
+    The \textnormal{positive semidefinite cone} is self-dual.
+\end{proposition}
+\begin{proof}
+    We first show that \(\left(\mathbb S_+^n\right)^\ast\subseteq\mathbb S_+^n\). Suppose \(Y\in\left(\mathbb S_+^n\right)^\ast\). Assume that \(Y\notin\mathbb S_+^n\), then there exists \(\xi\in\R^n\) such that \(\xi^TY\xi<0\), which means \(\Tr\left(\xi^TY\xi\right)=\Tr\left(\xi\xi^TY\right)<0\), while \(\xi\xi^T\in\mathbb S_+^n\), a contradiction.\par
+    Then suppose \(Y\in\mathbb S_+^n\) and we show that \(Y\in\left(\mathbb S_+^n\right)^\ast\). For every \(X\in\mathbb S_+^n\), we write \(X\) as its eigenvalue decomposition
+    \[X=\sum_{i=1}^n\lambda_iu_iu_i^T,\quad\lambda_i\geqslant 0,u_i\in\R^n.\]
+    We have that
+    \[\Tr\left(XY\right)=\Tr\left(\sum_{i=1}^n\lambda_iu_iu_i^TY\right)=\sum_{i=1}^n\lambda_i\Tr\left(u_i^TYu_i\right)\geqslant 0.\]
+    Hence \(\left(\mathbb S_+^n\right)^\ast=\mathbb S_+^n\).
+\end{proof}
+
+\begin{definition}[Dual norm]
+    For any norm \(\norm{\cdot}\), the \textnormal{dual norm} is defined as
+    \[\norm{u}_\ast=\sup\left\{u^Tx\mid\norm x\leqslant 1\right\}.\]
+\end{definition}
+
+\begin{proposition}
+    The dual of a norm cone \(K=\left\{(x,t)\in\R^{n+1}\mid\norm x\leqslant t\right\}\) is the cone defined by the dual norm
+    \[K^\ast=\left\{(y,u)\in\R^{n+1}\mid\norm y_\ast\leqslant u\right\}.\]
+\end{proposition}
+\begin{proof}
+    We have to show that \(\norm y_\ast\leqslant u\) if and only if for every \(x\in\R^n,t\geqslant 0\) with \(\norm x\leqslant t\), we have \(y^Tx+tu\geqslant 0\).\par
+    Suppose \(\norm y_\ast\leqslant u\), which gives by definition that \(\sup\left\{y^T\xi\mid\norm\xi\leqslant 1\right\}\leqslant u\), so \(\forall\norm\xi\leqslant 1,y^T\xi\leqslant u\). Therefore \(\forall x\in\R^n,t\geqslant 0\) with \(\norm{x}=\norm{-x}\leqslant t\), we have \(y^T(-x)\leqslant tu\Rightarrow y^Tx+tu\geqslant 0\).\par
+    Now suppose that \(y^Tx+tu\geqslant 0\) holds for every \(x\in\R^n,t\geqslant 0\) with \(\norm x\leqslant t\). Assume that \(\norm y_\ast>u\), which implies that \(\exists\xi\in\R^n\) with \(\norm\xi\leqslant 1\) such that \(y^T\xi>u\). This gives that \(y^T(-\xi)+1\cdot u<0\) with \(\norm{-\xi}\leqslant 1\), a contradiction.
+\end{proof}
+
+\begin{proposition}
+    The dual of the \(\ell_p\)-norm is the \(\ell_q\)-norm, where \(1/p+1/q=1,p,q>0\).
+\end{proposition}
+\begin{proof}
+    We have to show that
+    \[\norm u_q=\sup_x\left\{u^Tx\mid\norm x_p\leqslant 1\right\}\]
+    holds for every \(u\) and any \(p,q>0\) satisfying \(1/p+1/q=1\). When \(u=0\) both sides are zero, so we only consider the case where \(u\neq 0\). By Holder's inequality,
+    \[u^Tx\leqslant\norm{u^Tx}_1\leqslant\norm u_q\norm x_p\leqslant\norm u_q,\]
+    so if suffices to find a vector \(x\) with \(\norm x_p\leqslant 1\) such that \(\norm u_q=u^Tx\). Take
+    \[y=\left[\sgn(u_i)\abs{u_i}^{q-1}\right]_{i=1}^n,\]
+    so that 
+    \[u^Ty=\sum_{i=1}^n\abs{u_i}^q=\norm u_q^q,\]
+    and
+    \[\norm y_p^p=\sum_{i=1}^n\abs{u_i}^{p(q-1)}=\sum_{i=1}^n\abs{u_i}^q=\norm u_q^q.\]
+    Now let \(x=y/\norm u_q^{q-1}\), which satisfies
+    \[\norm x_p=\frac{\norm u_q^{q/p}}{\norm u_q^{q-1}}=\norm u_q^{q/p-q+1}=1,\quad\text{and}\quad u^Tx=\frac{\norm u_q^q}{\norm u_q^{q-1}}=\norm u_q,\]
+    so we are done.
+\end{proof}
+
+\begin{corollary}
+    The \(\ell_2\)-norm is self-dual.
+\end{corollary}
+
+The following will show step-by-step, that the dual cone of a proper cone is a proper cone.
+
+\begin{proposition}
+    \(K^{\ast\ast}\) is the closure of a convex cone \(K\). (Hence \(K^{\ast\ast}=K\) if \(K\) is closed.)
+\end{proposition}
+\begin{proof}
+    We know that a nonzero vector \(y\in K^\ast\) if and only if \(y\) is the normal vector of a homogeneous halfspace containing \(K\). Since the closure of \(K\) is the intersection of all homogeneous halfspaces containing \(K\), we have that
+    \[\cl K=\bigcap_{y\in K^\ast}\left\{x\mid y^Tx\geqslant 0\right\}=\left\{x\mid y^Tx\geqslant 0\,\forall y\in K^\ast\right\}=K^{\ast\ast}.\]
+\end{proof}
+
+\begin{proposition}
+    The dual of a cone is closed and convex.
+\end{proposition}
+\begin{proof}
+    The dual of a cone \(K\) is defined as
+    \[K^\ast=\left\{y\mid y^Tx\geqslant 0\,\forall x\in K\right\}=\bigcap_{x\in K}\left\{y\mid y^Tx\geqslant 0\right\},\]
+    which is the intersection of homogeneous halfspaces, and therefore closed and convex.
+\end{proof}
+
+\begin{proposition}
+    If \(K\) has nonempty interior, then \(K^\ast\) is pointed.
+\end{proposition}
+\begin{proof}
+    Assume that \(K^\ast\) is not pointed, i.e. contains a line \(\theta v,v\neq 0,\theta\in\R\). Then both \(v^Tx\geqslant 0\) and \((-v)^Tx\geqslant 0\) hold for every \(x\in K\), so \(v^Tx=0\) holds for every \(x\in K\). Since \(K\) has nonempty interior, there must be a ball \(B=\{x_c+u\mid\norm u_2\leqslant r\}\) contained in \(K\), so \(v^Tx=0\) holds for every \(x\in B\) too. It follows that \(v\) must be zero, so \(K^\ast\) is pointed.
+\end{proof}
+
+\begin{proposition}
+    If \(\cl K\) is pointed, then \(K^\ast\) has nonempty interior.
+\end{proposition}
+\begin{proof}
+    Assume that \(\inter K^\ast=\varnothing\). Since \(K^\ast\) is closed and convex, it must be contained in an affine space of lower dimension. Then the normal vector \(v\neq 0\) to that affine space will be contained in \(K^{\ast\ast}=\cl K\), and so is \(-v\). Hence \(\cl K\) contains a line, a contradiction.
+\end{proof}
+
+\begin{corollary}
+    The dual cone of a proper cone is a proper cone.
+\end{corollary}
+
+\section{Strong convexity}
+
+\begin{definition}[Strongly convex function]
+    A function \(f\) is said to be \(\mu\)\textnormal{-strongly convex} if
+    \[g(x)=f(x)-\frac{\mu}2\norm x_2^2\]
+    is convex, where \(\mu>0\) is constant.
+\end{definition}
+
+Intuitively, strong convexity means that there exists a quadratic lower bound on the growth of the function. It is natural that strong convexity implies convexity and strict convexity. Moreover, we have the following equivalent condition.
+
+\begin{proposition}
+    A function \(f\) is \(\mu\)-strongly convex if and only if for every \(\theta\in[0,1]\), we have
+    \[f(\theta x+(1-\theta)y)\leqslant\theta f(x)+(1-\theta)f(y)-\frac{\theta(1-\theta)\mu}2\norm{x-y}_2^2\]
+    for any \(x,y\).
+\end{proposition}
+\begin{proof}
+    It follows directly from the convexity of \(g(x)=f(x)-\mu\norm x_2^2/2\), which gives that \(g(\theta x+(1-\theta)y)\leqslant\theta f(x)+(1-\theta)f(y)\) holds for every \(x,y\in\dom f\) and \(\theta\in[0,1]\).
+\end{proof}
+
+Suppose further that \(f(x)\) is \(\mu\)-strongly convex differentiable function, we will have the following equivalent conditions.
+
+\begin{proposition}
+    A function \(f\) is \(\mu\)-strongly convex if and only if
+    \[f(y)\geqslant f(x)+\nabla f(x)^T(y-x)+\frac{\mu}2\norm{y-x}_2^2\]
+    for every \(x,y\in\dom f\).
+\end{proposition}
+\begin{proof}
+    It follows directly from the first-order condition of the convexity of \(g(x)=f(x)-\mu\norm x_2^2/2\), which gives that
+    \[g(y)\geqslant g(x)+\nabla g(x)^T(y-x).\]
+    (Note that \(\nabla\norm x_2^2=2x\).)
+\end{proof}
+
+\begin{remark}\label{rem1.4}
+    From the convexity of a differentiable convex function \(g(x)\), we have that
+    \[g(y)\geqslant g(x)+\nabla g(x)^T(y-x),\]
+    so
+    \[\begin{aligned}
+        \left(\nabla g(y)-\nabla g(x)\right)^T(y-x)
+        &= \nabla g(y)^T(y-x)-\nabla g(x)^T(y-x)\\
+        &\geqslant \nabla g(y)^T(y-x)-g(y)+g(x)\\
+        &\geqslant 0.
+    \end{aligned}\]
+\end{remark}
+
+\begin{proposition}
+    A function \(f\) is \(\mu\)-strongly convex if and only if
+    \[\left(\nabla f(x)-\nabla f(y)\right)^T(x-y)\geqslant\mu\norm{x-y}_2^2\]
+    for every \(x,y\in\dom f\).
+\end{proposition}
+\begin{proof}
+    It follows directly from Remark \ref{rem1.4}, noting that \(\nabla\norm x_2^2=2x\).
+\end{proof}
+
+\begin{proposition}
+    Suppose \(f(x)\) is differentiable and \(\mu\)-strongly convex. Then for every \(x,y\in\dom f\),
+    \[\norm{\nabla f(x)-\nabla f(y)}_2\geqslant\mu\norm{x-y}_2.\]
+\end{proposition}
+\begin{proof}
+    By Cauchy-Swartz inequality,
+    \[\norm{\nabla f(x)-\nabla f(y)}_2\norm{x-y}_2\geqslant\left(\nabla f(x)-\nabla f(y)\right)^T(x-y)\geqslant\mu\norm{x-y}_2^2.\]
+    Cancelling \(\norm{x-y}_2\) on both sides finishes the proof.
+\end{proof}
+
+\begin{remark}[Lipschitz]
+    A function \(f:U\to V\) is \textnormal{Lipschitz continuous} with \textnormal{Lipschitz constant} \(L\) if
+    \[d_V\left(f(x)-f(y)\right)\leqslant Ld_U(x-y)\]
+    for every \(x,y\in U\). Here \(d_U(\cdot)\) and \(d_V(\cdot)\) are metrics on \(U\) and \(V\) respectively.
+\end{remark}
+
+If a differentiable function \(f\) is \(\mu\)-strongly convex with its gradient \(\nabla f(x)\) \(L\)-Lipschitz continuous (suppose we use the \(\ell_2\)-norm), then we would see that
+\[\mu\norm{x-y}\leqslant\norm{\nabla f(x)-\nabla f(y)}\leqslant L\norm{x-y}\]
+holds for every \(x,y\in\dom f\). These concepts are essential in analyzing the rate of convergence of some algorithms.
+
+\section{Operations preserving convexity}
+
+\begin{proposition}
+    The maximum eigenvalue of symmetric matrices \(\lambda_{\max}(X)\) is a convex function.
+\end{proposition}
+\begin{proof}
+    By Rayleigh's Theorem \(\lambda_{\max}(X)=\max_{\norm y_2=1}y^TXy\), which is the maximum of convex functions, thus convex.
+\end{proof}
+
+\begin{theorem}[Rayleigh]\nocite{horn2012matrix}
+    Let \(A\in\C^{n\by n}\) be Hermitian with eigenvalues \(\lambda_1\leqslant\cdots\leqslant\lambda_n\) and corresponding unit eigenvectors \(x_1,\cdots,x_n\). Let \(i_1,\cdots,i_k\) be given integers with \(1\leqslant i_1<\cdots<i_k\leqslant n\). Let \(S=\Span\{x_{i_1},\cdots,x_{i_k}\}\). Then
+    \[\lambda_{i_1}=\min_{\substack{x\in S\\\norm x_2=1}}x^\ast Ax,\quad\lambda_{i_k}=\max_{\substack{x\in S\\\norm x_2=1}}x^\ast Ax,\]
+    with minimum and maximum achieved when \(x=x_{i_1}\) and \(x=x_{i_k}\), respectively. (Here \(x^\ast\) is the conjugate transpose of \(x\).)
+\end{theorem}
+\begin{proof}
+    For any \(x\in S\) with \(\norm x_2=1\), there exist scalars \(\alpha_1,\cdots,\alpha_k\) such that \(x=\sum_{j=1}^k\alpha_jx_{i_j}\). Since \(x\) is a unit norm vector,
+    \[x^\ast x=\sum_{j=1}^k\alpha_j^2x_{i_j}^\ast x_{i_j}=\sum_{j=1}^k\alpha_j^2=1.\]
+    Moreover, \(Ax=\sum_{j=1}^k\alpha_j\lambda_{i_j}x_{i_j}\), so
+    \[x^\ast Ax=\left(\sum_{j=1}^k\alpha_jx_{i_j}^\ast\right)\left(\sum_{j=1}^k\alpha_j\lambda_{i_j}x_{i_j}\right)=\sum_{j=1}^k\alpha_j^2\lambda_{i_j},\]
+    which is a convex combination of \(\lambda_{i_1},\cdots,\lambda_{i_k}\), so it lies between \(\lambda_{i_1}\) and \(\lambda_{i_k}\). When \(x=x_{i_1}\) the minimum is achieved, and when \(x=x_{i_k}\) the maximum is achieved.
+\end{proof}
+
+With regard to eigenvalues there are some other interesting facts. The following can be viewed as generalized versions of the Rayleigh's theorem.
+
+\begin{theorem}[Courant-Fischer]
+    Let \(A\in\C^{n\by n}\) be Hermitian with eigenvalues \(\lambda_1\leqslant\cdots\leqslant\lambda_n\). Then we have
+    \[\lambda_i=\min_{\dim V=i}\max_{\substack{x\in V\\\norm x_2=1}}x^\ast Ax,\]
+    and its dual form
+    \[\lambda_i=\max_{\dim V=n-i+1}\min_{\substack{x\in V\\\norm x_2=1}}x^\ast Ax.\]
+\end{theorem}
+\begin{proof}
+    Let \(x_1,\cdots,x_n\) be the eigenvectors associated with \(\lambda_1,\cdots,\lambda_n\). For a given \(i\in[n]\), let \(S=\Span\{x_i,\cdots,x_n\}\). For any subspace \(V\) with \(\dim V=i\), since \(\dim V+\dim S=n+1>n\), it follows that \(V\cap S\neq 0\). Then according to the Rayleigh's Theorem we have
+    \[\max_{\substack{x\in V\\\norm x_2=1}}x^\ast Ax\geqslant\max_{\substack{x\in V\cap S\\\norm x_2=1}}x^\ast Ax\geqslant\min_{\substack{x\in V\cap S\\\norm x_2=1}}x^\ast Ax\geqslant\min_{\substack{x\in S\\\norm x_2=1}}x^\ast Ax=\lambda_i.\]
+    The equality is achieved when \(V=\Span\{x_1,\cdots,x_i\}\), so we have
+    \[\lambda_i=\min_{\dim V=i}\max_{\substack{x\in V\\\norm x_2=1}}x^\ast Ax.\]
+    The dual form can be proved by applying the primal form to \(-A\), noting that the ordered eigenvalues are
+    \[\lambda_i(-A)=-\lambda_{n-i+1}(A).\]
+\end{proof}
+
+\begin{theorem}
+    Let \(A\in\C^{n\by n}\) be Hermitian with eigenvalues \(\lambda_1\leqslant\cdots\leqslant\lambda_n\). Suppose that \(1\leqslant m\leqslant n\). Then
+    \[\sum_{i=1}^m\lambda_i=\min_{\substack{V\in\C^{n\by m}\\V^\ast V=I_m}}\Tr(V^\ast AV),\]
+    and
+    \[\sum_{i=1}^m\lambda_{i+n-m}=\max_{\substack{V\in\C^{n\by m}\\V^\ast V=I_m}}\Tr(V^\ast AV).\]
+    The minimum and maximum are achieved for a matrix \(V\) whose columns are orthonormal eigenvectors associated with the \(m\) smallest or largest eigenvalues of \(A\).
+\end{theorem}
+
+Moreover, it is not surprising that similar things can apply to singular values of arbitrary matrices. The following theorem could be derived from Courant-Fischer.
+
+\begin{theorem}
+    Let \(A\in\C^{n\by m}\) with singular values \(\sigma_1\geqslant\cdots\geqslant\sigma_q\), where \(q=\min\{n,m\}\). Then for every \(i\in[q]\) we have
+    \[\sigma_i=\max_{\dim V=i}\min_{0\neq x\in V}\frac{\norm{Ax}_2}{\norm x_2},\]
+    and
+    \[\sigma_i=\min_{\dim V=m-i+1}\max_{0\neq x\in V}\frac{\norm{Ax}_2}{\norm x_2}.\]
+\end{theorem}
+
+\begin{theorem}
+    If \(f(x,y)\) is convex and \(C\) is a convex set, then \(g(x)=\inf_{y\in C}f(x,y)\) is convex. Here we take \(\dom g=\left\{x\mid (x,y)\in\dom f\textnormal{ for some }y\in C\right\}\).
+\end{theorem}
+\begin{proof}
+    Take any \(x_1,x_2\in\dom g\). For any \(\varepsilon>0\), there exists \(y_1,y_2\in C\) such that \(f(x_1,y_1)-\varepsilon\leqslant g(x_1),f(x_2,y_2)-\varepsilon\leqslant g(x_2)\). For any \(\theta\in[0,1]\), we have that
+    \[\begin{aligned}
+        g(\theta x_1+(1-\theta)x_2)
+        &= \inf_{y\in C}f\left(\theta x_1+(1-\theta)x_2, y\right)\\
+        &\leqslant f\left(\theta x_1+(1-\theta)x_2,\theta y_1+(1-\theta)y_2\right)\\
+        &\leqslant \theta f(x_1,y_1)+(1-\theta)f(x_2,y_2)\\
+        &\leqslant \theta g(x_1)+(1-\theta)g(x_2)+\varepsilon.
+    \end{aligned}\]
+    Since the above inequality holds for every \(\varepsilon>0\), we can conclude that
+    \[g\left(\theta x_1+(1-\theta)x_2\right)\leqslant\theta g(x_1)+(1-\theta)g(x_2),\]
+    so \(g\) is convex.
+\end{proof}
+
+\begin{definition}[Perspective]
+    The \textnormal{perspective} of a function \(f:\R^n\to\R\) is defined as
+    \[g(x,t)=tf(x/t),\quad\dom g=\left\{(x,t)\mid x/t\in\dom f,t>0\right\}.\]
+\end{definition}
+
+\begin{proposition}
+    The perspective of a convex function is convex.
+\end{proposition}
+\begin{proof}
+    There are several ways to prove it. First, we prove it by showing the Jensen's inequality for every \((x,t),(y,s)\in\dom g,\theta\in[0,1]\). We have that
+    \[\begin{aligned}
+        &\quad g(\theta x+(1-\theta)y,\theta t+(1-\theta)s)\\
+        &= \left(\theta t+(1-\theta)s\right)f\left(\frac{\theta x+(1-\theta)y}{\theta t+(1-\theta)s}\right)\\
+        &= \left(\theta t+(1-\theta)s\right)f\left(\frac{\theta t}{\theta t+(1-\theta)s}\cdot\frac xt+\frac{(1-\theta)s}{\theta t+(1-\theta)s}\cdot\frac ys\right)\\
+        &\leqslant \left(\theta t+(1-\theta)s\right)\left(\frac{\theta t}{\theta t+(1-\theta)s}f\left(\frac xt\right)+\frac{(1-\theta)s}{\theta t+(1-\theta)s}f\left(\frac ys\right)\right)\\
+        &= \theta g(x,t)+(1-\theta)g(y,s).
+    \end{aligned}\]
+    Moreover, there is another important way to prove the convexity of \(g\) if we look at the epigraph of \(g\). Note that for \(t>0\), \((x,t,s)\in\epi g\) if and only if \(tf(x/t)\leqslant s\), which is equivalent to \((x,s)/t\in\epi f\). Therefore, \(\epi g\) is the inverse image of \(\epi f\) under the perspective function
+    \[P(u,v,w)=(u,v)/w.\]
+    So \(\epi g\) is convex, and so is \(g\).
+\end{proof}
+
+\section{Conjugate function}
+
+\begin{definition}[Convex conjugate]
+    The \textnormal{convex conjugate} of a function \(f\) is
+    \[f^\ast(y)=\sup_{x\in\dom f}\left(y^Tx-f(x)\right).\]
+\end{definition}
+
+It is also called the \textbf{Fenchel conjugate}, \textbf{Fenchel transformation}, or the \textbf{Legendre-Fenchel transformation}.
+
+\begin{remark}
+    The conjugate function of any function is convex.
+\end{remark}
+\begin{proof}
+    \(f^\ast\) is the supremum of affine functions, hence convex.
+\end{proof}
+
+\begin{theorem}[Fenchel's inequality]
+    For a function \(f\) and its convex conjugate \(f^\ast\), we have that
+    \[y^Tx\leqslant f(x)+f^\ast(y).\]
+\end{theorem}
+\begin{proof}
+    It follows immediately from the definition that
+    \[f^\ast(y)\geqslant y^Tx-f(x),\quad\forall x,y\in\dom f.\]
+\end{proof}
+
+We are curious about the convex conjugate of the convex conjugate of a function. Below are some known facts, the proof of which is omitted here.
+
+\begin{definition}[Biconjugate]
+    \(f^{\ast\ast}\) is called the \textnormal{biconjugate} of a function \(f\).
+\end{definition}
+
+\begin{definition}[Lower semicontinuity]
+    A function \(f:X\to\bar\R\) is called \textnormal{lower semicontinuous} at a point \(x_0\in X\) if for every real \(y<f(x_0)\), there exists a neighborhood \(U\) of \(x_0\) such that \(f(x)>y\) for all \(x\in U\).
+\end{definition}
+
+\begin{remark}
+    \(f\) is lower semicontinuous if and only if all sublevel sets are closed.
+\end{remark}
+
+\begin{remark}
+    \(f\) is lower semicontinuous if and only if the epigraph of \(f\) is closed.
+\end{remark}
+
+Similarly we can define the concept of \textbf{upper semicontinuity}. A function is continuous if and only if it is both lower and upper semicontinuous.
+
+\begin{proposition}
+    The biconjugate \(f^{\ast\ast}\) is the largest lower semi-continuous convex function with \(f^{\ast\ast}\leqslant f\).
+\end{proposition}
+
+\begin{theorem}[Fenchel-Moreau]
+    \(f=f^{\ast\ast}\) if and only if \(f\) is a lower semi-continuous and convex function.
+\end{theorem}
+
+There is a very interesting fact about a function and its convex conjugate. Refer to \cite{zhou2018fenchel} for a proof of this theorem.
+
+\begin{theorem}
+    \begin{enumerate}
+        \item If \(f\) is closed and \(\mu\)-strongly convex, then \(f^\ast\) has a \(1/\mu\)-Lipschitz continuous gradient.
+        \item If \(f\) is convex and has an \(L\)-Lipschitz continuous gradient, then \(f^\ast\) is \(1/L\)-strongly convex.
+    \end{enumerate}
+\end{theorem}
+
+\section{Convex optimization}
+
+\begin{theorem}
+    Any locally optimal point of a convex optimization problem is globally optimal.
+\end{theorem}
+\begin{proof}
+    Suppose \(x\) is locally optimal, i.e. there exists \(R>0\) such that \(f_0(y)\geqslant f_0(x)\) holds for every feasible \(y\) with \(\norm{x-y}\leqslant R\). Assume that there exists \(x^\prime\neq x\) such that \(f_0(x^\prime)<f_0(x)\). Pick \(z\) on the line segment between \(x\) and \(x^\prime\), with \(0<\norm{z-x}<R\), so that \(z\) can be expressed in the form \(z=\theta x+(1-\theta)x^\prime\) for some \(\theta\in[0,1]\). Then by the convexity of \(f_0\) we have
+    \[f_0(z)\leqslant\theta f_0(x)+(1-\theta)f_0(x^\prime)<\theta f_0(x)+(1-\theta)f_0(x)=f_0(x),\]
+    contradictory with the fact that \(f_0(z)\geqslant f_0(x)\).
+\end{proof}
+
+\bibliographystyle{ieeetr}
+
+\bibliography{ref}
+
+\end{document}
